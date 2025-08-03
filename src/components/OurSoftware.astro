@@ -1,0 +1,508 @@
+---
+// src/components/OurSoftware.astro
+
+interface SoftwareFeature {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  phoneImage: string;
+  features: {
+    icon: string;
+    title: string;
+    description: string;
+  }[];
+}
+
+interface Props {
+  features?: SoftwareFeature[];
+  className?: string;
+}
+
+const {
+  features = [
+    {
+      id: 1,
+      title: "Time-saving HR software, included in your package",
+      subtitle: "",
+      description:
+        "Lighten your workload with the UK's favourite online Health & Safety and HR software. You'll free up time with heaps of clever tools and features – it's all part of your Peninsula service.",
+      buttonText: "Get in touch",
+      buttonLink: "#contact",
+      phoneImage: "/images/hr-software-phone.png",
+      features: [
+        {
+          icon: "✓",
+          title: "Manage staff absence online",
+          description: "Accept, reject, and track holiday requests in a click.",
+        },
+        {
+          icon: "✓",
+          title: "Complete CPD-certified courses",
+          description:
+            "Boost your skills or train your team, whenever it suits you.",
+        },
+        {
+          icon: "✓",
+          title: "Track your team's hours",
+          description: "Staff can clock in and out, from home or at work.",
+        },
+        {
+          icon: "✓",
+          title: "Schedule shifts with ease",
+          description: "Create, update, and share staff rotas remotely.",
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: "Time-saving HR software, included in your package",
+      subtitle: "",
+      description:
+        "Lighten your workload with the UK's favourite online Health & Safety and HR software. You'll free up time with heaps of clever tools and features – it's all part of your Peninsula service.",
+      buttonText: "Get in touch",
+      buttonLink: "#contact",
+      phoneImage: "/images/hr-software-phone-2.png",
+      features: [
+        {
+          icon: "✓",
+          title: "Sort your payroll",
+          description:
+            "Save time on staff payroll admin with our easy-to-use reporting tool.",
+        },
+        {
+          icon: "✓",
+          title: "Attract new customers",
+          description:
+            "Advertise your business with access to a thriving online marketplace.",
+        },
+        {
+          icon: "✓",
+          title: "Hire new staff",
+          description:
+            "Create job listings, store CVs, and securely manage applicants online.",
+        },
+        {
+          icon: "✓",
+          title: "Navigate sickness",
+          description:
+            "Record sick days, store fit notes, and easily arrange sickness cover.",
+        },
+      ],
+    },
+  ],
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-16 lg:py-24 bg-gray-50 ${className}`}>
+  <div class="container mx-auto px-6">
+    <div
+      x-data="{
+        currentSlide: 0,
+        totalSlides: 2,
+        features: [
+          {
+            id: 1,
+            title: 'Time-saving HR software, included in your package',
+            description: 'Lighten your workload with the UK\\'s favourite online Health & Safety and HR software. You\\'ll free up time with heaps of clever tools and features – it\\'s all part of your Peninsula service.',
+            buttonText: 'Get in touch',
+            buttonLink: '#contact',
+            phoneImage: 'https://picsum.photos/300/600?random=phone1',
+            features: [
+              {
+                icon: '✓',
+                title: 'Manage staff absence online',
+                description: 'Accept, reject, and track holiday requests in a click.'
+              },
+              {
+                icon: '✓', 
+                title: 'Complete CPD-certified courses',
+                description: 'Boost your skills or train your team, whenever it suits you.'
+              },
+              {
+                icon: '✓',
+                title: 'Track your team\\'s hours', 
+                description: 'Staff can clock in and out, from home or at work.'
+              },
+              {
+                icon: '✓',
+                title: 'Schedule shifts with ease',
+                description: 'Create, update, and share staff rotas remotely.'
+              }
+            ]
+          },
+          {
+            id: 2,
+            title: 'Time-saving HR software, included in your package',
+            description: 'Lighten your workload with the UK\\'s favourite online Health & Safety and HR software. You\\'ll free up time with heaps of clever tools and features – it\\'s all part of your Peninsula service.',
+            buttonText: 'Get in touch',
+            buttonLink: '#contact', 
+            phoneImage: 'https://picsum.photos/300/600?random=phone2',
+            features: [
+              {
+                icon: '✓',
+                title: 'Sort your payroll',
+                description: 'Save time on staff payroll admin with our easy-to-use reporting tool.'
+              },
+              {
+                icon: '✓',
+                title: 'Attract new customers',
+                description: 'Advertise your business with access to a thriving online marketplace.'
+              },
+              {
+                icon: '✓', 
+                title: 'Hire new staff',
+                description: 'Create job listings, store CVs, and securely manage applicants online.'
+              },
+              {
+                icon: '✓',
+                title: 'Navigate sickness',
+                description: 'Record sick days, store fit notes, and easily arrange sickness cover.'
+              }
+            ]
+          }
+        ],
+        nextSlide() {
+          this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+        },
+        prevSlide() {
+          this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+        },
+        goToSlide(index) {
+          this.currentSlide = index;
+        },
+        getCurrentFeature() {
+          return this.features[this.currentSlide];
+        }
+      };"
+      x-cloak
+    >
+      <!-- Main Content -->
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
+      >
+        <!-- Left Side - Content -->
+        <div class="order-2 lg:order-1 relative min-h-[600px]">
+          <!-- Content slides with animations -->
+          <template x-for="(feature, index) in features" :key="index">
+            <div
+              class="absolute inset-0 transition-slide duration-700 ease-in-out"
+              :class="{
+                'translate-x-0 opacity-100': currentSlide === index,
+                'translate-x-full opacity-0': currentSlide < index,
+                '-translate-x-full opacity-0': currentSlide > index
+              };"
+              x-show="true"
+            >
+              <!-- Title -->
+              <h2
+                class="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-6 leading-tight"
+                x-text="feature.title"
+              >
+              </h2>
+
+              <!-- Description -->
+              <p
+                class="text-lg text-gray-600 mb-8 leading-relaxed"
+                x-text="feature.description"
+              >
+              </p>
+
+              <!-- CTA Button -->
+              <div class="mb-12">
+                <a
+                  :href="feature.buttonLink"
+                  class="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <span x-text="feature.buttonText"></span>
+                  <svg
+                    class="w-5 h-5 ml-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+
+              <!-- Features List -->
+              <div class="space-y-6">
+                <template
+                  x-for="(featureItem, featureIndex) in feature.features"
+                  :key="featureIndex"
+                >
+                  <div class="flex items-start space-x-4">
+                    <!-- Checkmark Icon -->
+                    <div
+                      class="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5"
+                    >
+                      <span x-text="featureItem.icon"></span>
+                    </div>
+
+                    <!-- Feature Content -->
+                    <div class="flex-1">
+                      <h3
+                        class="font-semibold text-gray-900 mb-1"
+                        x-text="featureItem.title"
+                      >
+                      </h3>
+                      <p
+                        class="text-gray-600 text-sm"
+                        x-text="featureItem.description"
+                      >
+                      </p>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Right Side - Phone Mockup -->
+        <div class="order-1 lg:order-2 flex justify-center lg:justify-end">
+          <div class="relative">
+            <!-- Phone Frame -->
+            <div
+              class="relative w-72 h-[600px] bg-black rounded-[3rem] p-2 shadow-2xl"
+            >
+              <!-- Screen -->
+              <div
+                class="w-full h-full bg-white rounded-[2.5rem] overflow-hidden relative"
+              >
+                <!-- Status Bar -->
+                <div
+                  class="bg-white px-6 py-2 flex justify-between items-center text-black text-sm font-medium"
+                >
+                  <span>9:37</span>
+                  <div class="flex items-center space-x-1">
+                    <div class="flex space-x-1">
+                      <div class="w-1 h-1 bg-black rounded-full"></div>
+                      <div class="w-1 h-1 bg-black rounded-full"></div>
+                      <div class="w-1 h-1 bg-black rounded-full"></div>
+                      <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <svg
+                      class="w-6 h-6 ml-2"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M2 17h20v2H2zm1.15-4.05L4 11.47l.85 1.48c.3.52.94.67 1.46.37.52-.3.67-.94.37-1.46L6.03 10.5l.65-1.36c.3-.52.15-1.16-.37-1.46-.52-.3-1.16-.15-1.46.37L4 9.53 3.15 8.05c-.3-.52-.94-.67-1.46-.37-.52.3-.67.94-.37 1.46l.65 1.36-.65 1.36c-.3.52-.15 1.16.37 1.46.52.3 1.16.15 1.46-.37zm16 0L20 11.47l.85 1.48c.3.52.94.67 1.46.37.52-.3.67-.94.37-1.46L21.97 10.5l.65-1.36c.3-.52.15-1.16-.37-1.46-.52-.3-1.16-.15-1.46.37L20 9.53l-.85-1.48c-.3-.52-.94-.67-1.46-.37-.52.3-.67.94-.37 1.46l.65 1.36-.65 1.36c-.3.52-.15 1.16.37 1.46.52.3 1.16.15 1.46-.37z"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- App Content -->
+                <div class="p-4 h-full bg-gray-50">
+                  <!-- App Header -->
+                  <div class="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm text-gray-500">Hi, Billy</span>
+                      <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span class="text-sm text-gray-600"
+                        >Working from home</span
+                      >
+                      <span
+                        class="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                        >Live</span
+                      >
+                      <span
+                        class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded"
+                        >Timer</span
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Shifts Section -->
+                  <div class="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 mb-3">Shifts</h3>
+                    <div class="text-sm text-gray-600 mb-2">
+                      Your next shift
+                    </div>
+                    <div class="text-lg font-semibold text-gray-900 mb-1">
+                      Fri 07 Oct 2022 09:45 - 18:04
+                    </div>
+                    <div class="text-sm text-gray-500 mb-3">7 hrs 1 min</div>
+                    <button
+                      class="w-full bg-pink-100 text-pink-600 py-2 rounded-lg font-medium"
+                    >
+                      View your shifts
+                    </button>
+                  </div>
+
+                  <!-- Absences Section -->
+                  <div class="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 mb-3">Absences</h3>
+                    <div class="text-sm text-gray-600 mb-2">
+                      15 days of annual leave remaining
+                    </div>
+                    <div class="text-sm text-gray-500 mb-3">
+                      Next absence: Mon 26 Dec 2022 Full Day
+                    </div>
+                    <button
+                      class="w-full bg-pink-500 text-white py-2 rounded-lg font-medium"
+                    >
+                      View your absences
+                    </button>
+                  </div>
+
+                  <!-- Bottom Navigation -->
+                  <div class="absolute bottom-4 left-4 right-4">
+                    <div class="bg-white rounded-lg p-3 shadow-sm">
+                      <div class="flex items-center justify-between">
+                        <div class="text-center">
+                          <div class="w-8 h-8 bg-gray-200 rounded-lg mb-1">
+                          </div>
+                          <span class="text-xs text-gray-500">Overview</span>
+                        </div>
+                        <div class="text-center">
+                          <div class="w-8 h-8 bg-gray-200 rounded-lg mb-1">
+                          </div>
+                          <span class="text-xs text-gray-500">Personal</span>
+                        </div>
+                        <div class="text-center">
+                          <div
+                            class="w-8 h-8 bg-pink-500 rounded-lg mb-1 flex items-center justify-center"
+                          >
+                            <svg
+                              class="w-4 h-4 text-white"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                          <span class="text-xs text-gray-500">Add</span>
+                        </div>
+                        <div class="text-center relative">
+                          <div class="w-8 h-8 bg-gray-200 rounded-lg mb-1">
+                          </div>
+                          <div
+                            class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center"
+                          >
+                            <span class="text-xs text-white">2</span>
+                          </div>
+                          <span class="text-xs text-gray-500"
+                            >Notifications</span
+                          >
+                        </div>
+                        <div class="text-center">
+                          <div class="w-8 h-8 bg-gray-200 rounded-lg mb-1">
+                          </div>
+                          <span class="text-xs text-gray-500">Menu</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Home Indicator -->
+              <div
+                class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white rounded-full"
+              >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel Controls -->
+      <div class="flex items-center justify-center mt-12 space-x-6">
+        <!-- Slide Indicators -->
+        <!-- <div class="flex space-x-2">
+          <template x-for="(slide, index) in features" :key="index">
+            <button
+              @click="goToSlide(index)"
+              class="w-3 h-3 rounded-full transition-all duration-200"
+              :class="currentSlide === index ? 'bg-blue-600' : 'bg-gray-300'"
+            ></button>
+          </template>
+        </div> -->
+
+        <!-- Page Counter -->
+        <div class="flex items-center space-x-4 text-gray-600">
+          <span class="text-lg font-medium">
+            <span x-text="currentSlide + 1"></span> / <span x-text="totalSlides"
+            ></span>
+          </span>
+
+          <!-- Navigation Arrows -->
+          <div class="flex space-x-2">
+            <button
+              @click="prevSlide()"
+              class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+              :disabled="currentSlide === 0"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <button
+              @click="nextSlide()"
+              class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+              :disabled="currentSlide === totalSlides - 1"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Hide content until Alpine.js loads */
+  [x-cloak] {
+    display: none !important;
+  }
+
+  /* Smooth transitions */
+  .transition-slide {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Phone mockup enhancements */
+  .phone-shadow {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+</style>

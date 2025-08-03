@@ -1,7 +1,7 @@
 // src/scripts/performance-monitor.js
 
-// Core Web Vitals monitoring
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+// Core Web Vitals monitoring - Updated for web-vitals v5+
+import { onCLS, onFID, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 
 // Report to analytics (replace with your analytics service)
 function sendToAnalytics(metric) {
@@ -19,11 +19,13 @@ function sendToAnalytics(metric) {
 }
 
 // Monitor all Core Web Vitals
-getCLS(sendToAnalytics);
-getFID(sendToAnalytics);
-getFCP(sendToAnalytics);
-getLCP(sendToAnalytics);
-getTTFB(sendToAnalytics);
+onCLS(sendToAnalytics);
+onFID(sendToAnalytics);
+onFCP(sendToAnalytics);
+onLCP(sendToAnalytics);
+onTTFB(sendToAnalytics);
+// INP (Interaction to Next Paint) - replaces FID in newer versions
+onINP(sendToAnalytics);
 
 // Additional performance monitoring
 const observer = new PerformanceObserver((list) => {
