@@ -1,0 +1,37 @@
+---
+const { show, onClose, children } = Astro.props;
+---
+
+<style>
+  /* Prevent Alpine.js FOUC */
+  [x-cloak] {
+    display: none !important;
+  }
+</style>
+
+<div
+  x-show={show}
+  x-transition.opacity
+  class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+  @click={onClose}
+  x-cloak
+>
+</div>
+
+<div
+  x-show={show}
+  x-transition:enter="transition duration-300 transform"
+  x-transition:enter-start="translate-x-full"
+  x-transition:enter-end="translate-x-0"
+  x-transition:leave="transition duration-300 transform"
+  x-transition:leave-start="translate-x-0"
+  x-transition:leave-end="translate-x-full"
+  class="fixed top-0 right-0 h-full z-50 bg-white w-full md:w-[400px] overflow-y-auto shadow-lg"
+  @click.away={onClose}
+  x-cloak
+>
+  <button @click={onClose} class="absolute top-4 right-4 text-xl">✕</button>
+  <div class="p-6 pt-14">
+    <slot />
+  </div>
+</div>

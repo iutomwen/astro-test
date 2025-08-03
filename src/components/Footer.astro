@@ -1,0 +1,320 @@
+---
+// src/components/Footer.astro
+
+interface Props {
+  className?: string;
+}
+
+const { className = "" } = Astro.props;
+
+// Footer data structure
+const footerData = {
+  locations: {
+    title: "Locations",
+    links: [
+      { text: "HR Services", href: "/hr-services", hasDropdown: true },
+      { text: "Employment Law", href: "/employment-law", hasDropdown: true },
+      { text: "Health & Safety Consultants", href: "/health-safety", hasDropdown: true },
+    ]
+  },
+  usefulLinks: {
+    title: "Useful links",
+    links: [
+      { text: "About Us", href: "/about" },
+      { text: "Knowledge centre", href: "/knowledge" },
+      { text: "Blog", href: "/blog" },
+      { text: "Contact us", href: "/contact" },
+      { text: "Refer a business", href: "/refer" },
+      { text: "Free downloads", href: "/downloads" },
+      { text: "EAP", href: "/eap" },
+    ]
+  },
+  legal: {
+    title: "Legal",
+    links: [
+      { text: "Compliance policy", href: "/compliance" },
+      { text: "Group tax strategy", href: "/tax-strategy" },
+      { text: "Privacy policy", href: "/privacy" },
+      { text: "Complaints procedure", href: "/complaints" },
+      { text: "GDPR Compliance Statement", href: "/gdpr" },
+      { text: "Slavery and Human Trafficking Statement", href: "/slavery-statement" },
+      { text: "Criminal Finances Act 2017", href: "/criminal-finances" },
+      { text: "Section 172 (1) Statement", href: "/section-172" },
+      { text: "Gender Pay Gap Report", href: "/gender-pay-gap" },
+      { text: "How to Spot a Fake Website", href: "/fake-website" },
+    ]
+  },
+  contact: {
+    title: "Get in touch",
+    address: {
+      company: "The Peninsula",
+      street: "Victoria Place",
+      city: "Manchester",
+      postcode: "M4 4FB (Sat Nav M4 4EW)",
+      country: "UK"
+    },
+    phone: "0800 029 4378",
+    phoneSubtext: "Speak to an expert 24/7"
+  },
+  social: {
+    title: "Social",
+    links: [
+      { name: "Facebook", href: "https://facebook.com/peninsula", icon: "facebook" },
+      { name: "LinkedIn", href: "https://linkedin.com/company/peninsula", icon: "linkedin" },
+      { name: "YouTube", href: "https://youtube.com/peninsula", icon: "youtube" },
+      { name: "Instagram", href: "https://instagram.com/peninsula", icon: "instagram" },
+    ]
+  },
+  internationalSites: [
+    { text: "Northern Ireland", href: "/ni" },
+    { text: "Scotland", href: "/scotland" },
+    { text: "Canada", href: "/canada" },
+    { text: "Australia", href: "/australia" },
+    { text: "New Zealand", href: "/new-zealand" },
+  ],
+  certifications: [
+    { name: "Cyber Essentials", image: "/images/cyber-essentials.png" },
+    { name: "SAFE Contractor", image: "/images/safe-contractor.png" },
+    { name: "ISO Certification", image: "/images/iso-cert.png" },
+    { name: "Top 100", image: "/images/top-100.png" },
+    { name: "Best Places to Work", image: "/images/best-places.png" },
+  ]
+};
+---
+
+<footer class={`bg-white border-t border-gray-200 ${className}`}>
+  <!-- Main Footer Content -->
+  <div class="bg-white py-16">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+        
+        <!-- Locations Column -->
+        <div class="lg:col-span-1">
+          <h3 class="text-lg font-bold text-gray-900 mb-6">{footerData.locations.title}</h3>
+          <ul class="space-y-4">
+            {footerData.locations.links.map((link) => (
+              <li x-data="{ open: false }" class="relative">
+                <a 
+                  href={link.href}
+                  class="text-gray-600 hover:text-blue-600 transition-colors duration-200 flex items-center group"
+                  @click={link.hasDropdown ? "open = !open; $event.preventDefault()" : ""}
+                >
+                  {link.text}
+                  {link.hasDropdown && (
+                    <svg 
+                      class="w-4 h-4 ml-2 text-gray-400 group-hover:text-blue-600 transition-all duration-200"
+                      :class="{ 'rotate-180': open }"
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  )}
+                </a>
+                
+                {link.hasDropdown && (
+                  <div 
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    class="mt-2 pl-4 space-y-2"
+                    style="display: none;"
+                  >
+                    <ul class="border-l-2 border-gray-200 pl-4 space-y-2">
+                      <li>
+                        <a href="/hr-services/recruitment" class="text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200 block">
+                          Recruitment Support
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/hr-services/policies" class="text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200 block">
+                          HR Policies
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/hr-services/training" class="text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200 block">
+                          Training & Development
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/hr-services/advice" class="text-sm text-gray-500 hover:text-blue-600 transition-colors duration-200 block">
+                          24/7 HR Advice
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Useful Links Column -->
+        <div class="lg:col-span-1">
+          <h3 class="text-lg font-bold text-gray-900 mb-6">{footerData.usefulLinks.title}</h3>
+          <ul class="space-y-4">
+            {footerData.usefulLinks.links.map((link) => (
+              <li>
+                <a 
+                  href={link.href}
+                  class="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                >
+                  {link.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Legal Column -->
+        <div class="lg:col-span-1">
+          <h3 class="text-lg font-bold text-gray-900 mb-6">{footerData.legal.title}</h3>
+          <ul class="space-y-4">
+            {footerData.legal.links.map((link) => (
+              <li>
+                <a 
+                  href={link.href}
+                  class="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                >
+                  {link.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Contact & Social Column -->
+        <div class="lg:col-span-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Contact Information -->
+            <div>
+              <!-- Peninsula Logo -->
+              <div class="mb-6">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-red-500 rounded-sm flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-lg">P</span>
+                  </div>
+                  <span class="text-xl font-bold text-gray-900">PENINSULA</span>
+                </div>
+              </div>
+
+              <h3 class="text-lg font-bold text-gray-900 mb-6">{footerData.contact.title}</h3>
+              
+              <!-- Address -->
+              <div class="mb-6">
+                <p class="text-gray-600 leading-relaxed">
+                  {footerData.contact.address.company}<br/>
+                  {footerData.contact.address.street}<br/>
+                  {footerData.contact.address.city}<br/>
+                  {footerData.contact.address.postcode}<br/>
+                  {footerData.contact.address.country}
+                </p>
+              </div>
+
+              <!-- Phone -->
+              <div class="mb-6">
+                <a 
+                  href={`tel:${footerData.contact.phone.replace(/\s/g, '')}`}
+                  class="text-2xl font-bold text-red-500 hover:text-red-600 transition-colors duration-200"
+                >
+                  {footerData.contact.phone}
+                </a>
+                <p class="text-sm text-gray-600 mt-1">
+                  • {footerData.contact.phoneSubtext}
+                </p>
+              </div>
+            </div>
+
+            <!-- Social Media -->
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 mb-6">{footerData.social.title}</h3>
+              <div class="flex space-x-4">
+                {footerData.social.links.map((social) => (
+                  <a 
+                    href={social.href}
+                    class="w-10 h-10 bg-gray-100 hover:bg-blue-600 text-gray-600 hover:text-white rounded-lg flex items-center justify-center transition-all duration-200"
+                    aria-label={social.name}
+                  >
+                    {social.icon === 'facebook' && (
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    )}
+                    {social.icon === 'linkedin' && (
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    )}
+                    {social.icon === 'youtube' && (
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                    )}
+                    {social.icon === 'instagram' && (
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.017 0C8.396 0 7.989.013 7.041.048 6.094.082 5.52.204 5.036.388a6.5 6.5 0 0 0-2.346 1.527c-.7.7-1.22 1.453-1.527 2.346-.184.484-.306 1.058-.34 2.005C.048 7.989.035 8.396.035 12.017c0 3.624.013 4.09.048 5.101.034.946.156 1.521.34 2.005a6.5 6.5 0 0 0 1.527 2.346 6.5 6.5 0 0 0 2.346 1.527c.484.184 1.058.306 2.005.34 1.101.035 1.508.048 5.101.048 3.624 0 4.09-.013 5.101-.048.946-.034 1.521-.156 2.005-.34a6.52 6.52 0 0 0 2.346-1.527 6.52 6.52 0 0 0 1.527-2.346c.184-.484.306-1.058.34-2.005.035-1.101.048-1.508.048-5.101 0-3.624-.013-4.09-.048-5.101-.034-.946-.156-1.521-.34-2.005a6.52 6.52 0 0 0-1.527-2.346A6.52 6.52 0 0 0 19.022.388c-.484-.184-1.058-.306-2.005-.34C16.08.013 15.673.001 12.017.001h0zm-.017 1.8h.017c3.568 0 3.99.013 5.4.048.9.035 1.4.162 1.728.269.434.168.745.369 1.072.695.326.326.527.638.695 1.072.107.328.234.828.269 1.728.035 1.41.048 1.832.048 5.4 0 3.568-.013 3.99-.048 5.4-.035.9-.162 1.4-.269 1.728-.168.434-.369.745-.695 1.072-.326.326-.638.527-1.072.695-.328.107-.828.234-1.728.269-1.41.035-1.832.048-5.4.048-3.568 0-3.99-.013-5.4-.048-.9-.035-1.4-.162-1.728-.269a2.88 2.88 0 0 1-1.072-.695 2.88 2.88 0 0 1-.695-1.072c-.107-.328-.234-.828-.269-1.728-.035-1.41-.048-1.832-.048-5.4 0-3.568.013-3.99.048-5.4.035-.9.162-1.4.269-1.728.168-.434.369-.745.695-1.072.326-.326.638-.527 1.072-.695.328-.107.828-.234 1.728-.269 1.41-.035 1.832-.048 5.4-.048z"/>
+                        <path d="M12.017 5.8a6.217 6.217 0 1 0 0 12.434 6.217 6.217 0 0 0 0-12.434zm0 10.25a4.033 4.033 0 1 1 0-8.066 4.033 4.033 0 0 1 0 8.066z"/>
+                        <circle cx="18.408" cy="5.592" r="1.452"/>
+                      </svg>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bg-slate-800 py-8">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+        
+        <!-- International Sites -->
+        <div class="flex flex-wrap justify-center lg:justify-start gap-4 text-sm">
+          <span class="text-white font-medium">International sites</span>
+          {footerData.internationalSites.map((site, index) => (
+            <Fragment>
+              <a 
+                href={site.href}
+                class="text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {site.text}
+              </a>
+              {index < footerData.internationalSites.length - 1 && (
+                <span class="text-gray-500">|</span>
+              )}
+            </Fragment>
+          ))}
+        </div>
+
+        <!-- Certifications -->
+        <div class="flex items-center space-x-4">
+          {footerData.certifications.map((cert) => (
+            <div class="w-16 h-12 bg-white rounded p-1 flex items-center justify-center">
+              <!-- Placeholder for certification images - replace with actual images -->
+              <div class="text-xs text-gray-600 text-center font-medium">
+                {cert.name.split(' ')[0]}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Copyright -->
+      <div class="mt-8 pt-8 border-t border-gray-700">
+        <p class="text-gray-400 text-sm leading-relaxed">
+          © 2025 Peninsula Business Services Limited. Registered Office: The Peninsula, Victoria Place, Manchester, M4 4FB. Registered in England and Wales No: 1702759. Peninsula Business Services Limited is authorised and regulated by the Financial Conduct Authority for the sale of non-investment insurance contracts.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

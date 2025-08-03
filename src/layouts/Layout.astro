@@ -1,0 +1,49 @@
+---
+import BaseHeader from "../components/BaseHeader.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import Newsletter from "../components/Newsletter.astro";
+import CriticalCSS from "../components/CriticalCSS.astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://picsum.photos" />
+    <link rel="dns-prefetch" href="https://picsum.photos" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Core Web Vitals optimizations -->
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Peninsula Business Services - HR, Employment Law & Health Safety support for UK businesses"
+    />
+
+    <title>Peninsula Business Services - HR & Employment Law Experts</title>
+    <CriticalCSS />
+    <BaseHeader />
+  </head>
+  <body>
+    <Nav />
+    <!-- <div class="container mx-auto px-4"></div> -->
+    <slot />
+    <Newsletter />
+    <Footer />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

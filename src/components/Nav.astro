@@ -1,0 +1,86 @@
+---
+import Drawer from "./Drawer.astro";
+import MegaMenu from "./MegaMenu.astro";
+import { primaryNav, secondaryNav } from "../data/navData";
+import NavItem from "./NavItem.astro";
+---
+
+<style>
+  /* Prevent Alpine.js FOUC (Flash of Unstyled Content) */
+  [x-cloak] {
+    display: none !important;
+  }
+</style>
+
+<div
+  x-data="{ drawerOpen: false }"
+  x-cloak
+  class="fixed top-0 left-0 right-0 z-50"
+>
+  <!-- Desktop Navigation -->
+  <nav class="hidden md:block bg-white shadow-sm border-b border-gray-200">
+    <div class="container mx-auto px-6">
+      <div class="flex justify-between items-center py-4">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center">
+            <img src="/favicon.svg" alt="Logo" class="h-8 w-8 mr-3" />
+            <span class="text-xl font-bold text-gray-900">Your Brand</span>
+          </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="flex items-center space-x-8">
+          <MegaMenu primaryNav={primaryNav} />
+        </div>
+
+        <!-- Contact & Menu -->
+        <div class="flex items-center space-x-6">
+          <!-- Contact Info -->
+          <div class="hidden lg:flex-col lg:flex items-center space-x-2">
+            <span class="text-red-600 font-bold text-lg">0800 029 4378</span>
+            <span class="text-sm text-gray-600">Speak to an expert 24/7</span>
+          </div>
+
+          <!-- Menu Button -->
+          <button
+            @click="drawerOpen = true"
+            class="flex items-center space-x-2 text-gray-900 hover:text-gray-700 transition-colors"
+          >
+            <span class="font-semibold">Menu</span>
+            <div class="flex flex-col space-y-1">
+              <div class="w-5 h-0.5 bg-gray-900"></div>
+              <div class="w-5 h-0.5 bg-gray-900"></div>
+              <div class="w-5 h-0.5 bg-gray-900"></div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation -->
+  <nav
+    class="flex md:hidden justify-between items-center bg-blue-800 px-4 py-4"
+  >
+    <div class="text-white font-bold text-lg">Logo</div>
+    <button @click="drawerOpen = true" class="text-white text-2xl">☰</button>
+  </nav>
+
+  <!-- Drawer Component -->
+  <Drawer show="drawerOpen" onClose="drawerOpen = false">
+    <!-- Mobile Full Menu -->
+    <div class="md:hidden" x-data="{ openSubmenu: {} }">
+      <h2 class="text-lg font-semibold mb-6 text-gray-800">Main Menu</h2>
+      <NavItem link={primaryNav} />
+
+      <hr class="my-8 border-gray-200" />
+    </div>
+
+    <!-- Secondary Menu (Always in drawer) -->
+    <div x-data="{ openSubmenu: {} }">
+      <h2 class="text-lg font-semibold mb-6 text-gray-800">More</h2>
+      <NavItem link={secondaryNav} />
+    </div>
+  </Drawer>
+</div>

@@ -1,0 +1,28 @@
+---
+import Welcome from "../components/Welcome.astro";
+import Layout from "../layouts/Layout.astro";
+import ParallaxSlider from "../components/ParallaxSlider.astro";
+import { sliderData } from "../data/sliderData";
+import ImageTextContainer from "../components/ImageTextContainer.astro";
+import { supportSectionData } from "../data/imageTextData";
+import HeroSection from "../components/HeroSection.astro";
+import { heroSectionData } from "../data/heroData.ts";
+import Testimonial from "../components/Testimonial.astro";
+import { testimonialData } from "../data/testimonialData.ts";
+import Newsletter from "../components/Newsletter.astro";
+---
+
+<Layout>
+  <HeroSection {...heroSectionData} />
+  <ImageTextContainer {...supportSectionData} />
+  <ParallaxSlider slides={sliderData} />
+  <Testimonial
+    testimonials={testimonialData}
+    title="Helping employers like you for 40 years"
+    subtitle="Tens of thousands of UK business owners reduce risk and worry with Peninsula support. Discover their stories below..."
+    primaryButtonText="Speak to an expert"
+    primaryButtonLink="#contact"
+    secondaryButtonText="Read more case studies"
+    secondaryButtonLink="/case-studies"
+  />
+</Layout>

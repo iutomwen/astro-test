@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Core Web Vitals optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent layout shifts */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve paint performance */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Optimize font loading */
+.font-display-swap {
+  font-display: swap;
+}
+
+/* Reduce layout thrashing */
+.transform-gpu {
+  transform: translateZ(0);
+}
+
+/* Performance hints for animations */
+.animate-smooth {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Critical above-the-fold content */
+.critical-resource {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}

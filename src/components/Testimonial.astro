@@ -1,0 +1,243 @@
+---
+// src/components/Testimonial.astro
+
+export interface TestimonialItem {
+  id: number;
+  name: string;
+  position?: string;
+  company?: string;
+  content: string;
+  industry?: string;
+  image?: string;
+}
+
+interface Props {
+  testimonials: TestimonialItem[];
+  showNavigation?: boolean;
+  title?: string;
+  subtitle?: string;
+  primaryButtonText?: string;
+  primaryButtonLink?: string;
+  secondaryButtonText?: string;
+  secondaryButtonLink?: string;
+}
+
+const {
+  testimonials,
+  showNavigation = true,
+  title = "Helping employers like you for 40 years",
+  subtitle = "Tens of thousands of UK business owners reduce risk and worry with Peninsula support. Discover their stories below...",
+  primaryButtonText = "Speak to an expert",
+  primaryButtonLink = "#contact",
+  secondaryButtonText = "Read more case studies",
+  secondaryButtonLink = "/case-studies"
+} = Astro.props;
+---
+
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <!-- Header -->
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+        {title.includes('40 years') ? (
+          <span>
+            Helping employers like you for <span class="text-red-500 relative">
+              40 years
+              <span class="absolute bottom-0 left-0 w-full h-1 bg-red-500"></span>
+            </span>
+          </span>
+        ) : (
+          title
+        )}
+      </h2>
+      {subtitle && (
+        <p class="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          {subtitle}
+        </p>
+      )}
+    </div>
+
+    <!-- Testimonials Slider -->
+    <div 
+      class="relative max-w-7xl mx-auto"
+      x-data={`{
+        currentSlide: 0,
+        testimonials: ${JSON.stringify(testimonials)},
+        
+        nextSlide() {
+          this.currentSlide = (this.currentSlide + 1) % this.testimonials.length;
+        },
+        
+        prevSlide() {
+          this.currentSlide = this.currentSlide === 0 ? this.testimonials.length - 1 : this.currentSlide - 1;
+        },
+        
+        goToSlide(index) {
+          this.currentSlide = index;
+        },
+        
+        getCurrentTestimonial() {
+          return this.testimonials[this.currentSlide];
+        }
+      }`}
+      x-cloak
+    >
+      <!-- Main Content Container -->
+      <div class="relative overflow-hidden bg-white shadow-xl rounded-xl testimonial-grid">
+        <div class="grid grid-cols-1 lg:grid-cols-2 min-h-[500px]">
+          
+          <!-- Left Side - Main Testimonial Content -->
+          <div class="p-8 lg:p-16 bg-white flex flex-col justify-center">
+            <div class="max-w-lg">
+              <!-- Large Quote Icon -->
+              <div class="mb-6">
+                <svg class="w-20 h-20 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                </svg>
+              </div>
+              
+              <!-- Quote Text -->
+              <blockquote 
+                class="text-xl lg:text-2xl xl:text-3xl text-gray-900 font-normal mb-8 leading-relaxed"
+                x-text="getCurrentTestimonial().content"
+              ></blockquote>
+              
+              <!-- Author Info -->
+              <div class="space-y-1">
+                <h4 class="text-lg font-bold text-gray-900">
+                  <span x-text="getCurrentTestimonial().name"></span>, <span x-text="getCurrentTestimonial().position"></span>
+                </h4>
+                <p class="text-lg font-bold text-gray-900" x-text="getCurrentTestimonial().company"></p>
+                
+                <!-- Industry Tag -->
+                <div class="pt-2" x-show="getCurrentTestimonial().industry">
+                  <span 
+                    class="inline-block bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium"
+                    x-text="getCurrentTestimonial().industry"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Side - Image Collage -->
+          <div class="relative h-[500px] overflow-hidden">
+            <!-- Main large image (current testimonial) -->
+            <div class="absolute left-0 top-0 w-3/5 h-full cursor-pointer">
+              <img 
+                :src="getCurrentTestimonial().image" 
+                :alt="getCurrentTestimonial().name"
+                class="w-full h-full object-cover transition-all duration-500"
+                loading="lazy"
+                decoding="async"
+                width="400"
+                height="500"
+              />
+              <!-- Optional: Add name overlay for main image -->
+              <div class="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-2 rounded">
+                <p class="text-sm font-medium" x-text="getCurrentTestimonial().name"></p>
+              </div>
+            </div>
+            
+            <!-- Top right image (next testimonial) -->
+            <div class="absolute right-0 top-0 w-2/5 h-1/2 cursor-pointer" @click="nextSlide()">
+              <img 
+                :src="testimonials[(currentSlide + 1) % testimonials.length].image" 
+                :alt="testimonials[(currentSlide + 1) % testimonials.length].name"
+                class="w-full h-full object-cover transition-all duration-300 hover:brightness-110"
+                loading="lazy"
+                decoding="async"
+                width="200"
+                height="250"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-20 hover:bg-opacity-10 transition-all duration-300"></div>
+            </div>
+            
+            <!-- Bottom right image (previous testimonial) -->
+            <div class="absolute right-0 bottom-0 w-2/5 h-1/2 cursor-pointer" @click="prevSlide()">
+              <img 
+                :src="testimonials[(currentSlide - 1 + testimonials.length) % testimonials.length].image" 
+                :alt="testimonials[(currentSlide - 1 + testimonials.length) % testimonials.length].name"
+                class="w-full h-full object-cover transition-all duration-300 hover:brightness-110"
+                loading="lazy"
+                decoding="async"
+                width="200"
+                height="250"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-20 hover:bg-opacity-10 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Controls -->
+      <div class="flex flex-col md:flex-row justify-between items-center mt-12 gap-6">
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 sm:items-center">
+          {primaryButtonText && primaryButtonLink && (
+            <a 
+              href={primaryButtonLink}
+              class="inline-flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+            >
+              {primaryButtonText}
+            </a>
+          )}
+          
+          {secondaryButtonText && secondaryButtonLink && (
+            <a 
+              href={secondaryButtonLink}
+              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200 underline text-lg"
+            >
+              {secondaryButtonText}
+            </a>
+          )}
+        </div>
+
+        <!-- Navigation Controls -->
+        {showNavigation && (
+          <div class="flex items-center space-x-4">
+            <!-- Slide Counter -->
+            <div class="text-gray-600 text-xl font-medium">
+              <span class="font-bold text-gray-900" x-text="currentSlide + 1"></span> 
+              <span class="text-gray-400 mx-1">/</span> 
+              <span class="text-gray-500" x-text="testimonials.length"></span>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <div class="flex space-x-2">
+              <button
+                @click="prevSlide()"
+                class="w-12 h-12 bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-600 rounded-md flex items-center justify-center transition-all duration-200"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              
+              <button
+                @click="nextSlide()"
+                class="w-12 h-12 bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-600 rounded-md flex items-center justify-center transition-all duration-200"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Custom styling for testimonial component */
+  .testimonial-grid {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Hide content until Alpine.js loads */
+  [x-cloak] {
+    display: none !important;
+  }
+</style>
