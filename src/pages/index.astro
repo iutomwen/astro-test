@@ -10,6 +10,7 @@ import { heroSectionData } from "../data/heroData.ts";
 import Testimonial from "../components/Testimonial.astro";
 import { testimonialData } from "../data/testimonialData.ts";
 import OurSoftware from "../components/OurSoftware.astro";
+import Reviews from "../components/Reviews.astro";
 ---
 
 <Layout>
@@ -17,6 +18,7 @@ import OurSoftware from "../components/OurSoftware.astro";
   <ImageTextContainer {...supportSectionData} />
   <ParallaxSlider slides={sliderData} />
   <OurSoftware />
+  <Reviews />
   <Testimonial
     testimonials={testimonialData}
     title="Helping employers like you for 40 years"

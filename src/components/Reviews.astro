@@ -1,0 +1,415 @@
+---
+// Reviews component data - optimized for performance
+const reviews = [
+  {
+    id: 1,
+    name: "South Coast Pest Control",
+    timeAgo: "1 week ago",
+    rating: 5,
+    text: "We had our health and safety review with Ian Goodwin this week. Ian is so knowledgeable in this subject, he is really...",
+    source: "Google Reviews"
+  },
+  {
+    id: 2,
+    name: "Amy Gardner",
+    timeAgo: "1 week ago",
+    rating: 5,
+    text: "Exceptional professional advice from Alexander Bruce this morning. Just wanted to chat something through and he provided th...",
+    source: "Google Reviews"
+  },
+  {
+    id: 3,
+    name: "Jack Watson",
+    timeAgo: "1 week ago",
+    rating: 5,
+    text: "Excellent service and very professional would highly recommend.",
+    source: "Google Reviews"
+  },
+  {
+    id: 4,
+    name: "Erin Campbell",
+    timeAgo: "1 week ago",
+    rating: 5,
+    text: "Great staff from David Murray, very informative and engaging on the dangers of fire and what we can be doing as a business.",
+    source: "Google Reviews"
+  },
+  {
+    id: 5,
+    name: "Emma Thompson",
+    timeAgo: "2 weeks ago",
+    rating: 5,
+    text: "Fantastic service from the team, especially from David Murray. Very informative and engaging on the dangers of fire and what we can be doing as a business.",
+    source: "Google Reviews"
+  },
+  {
+    id: 6,
+    name: "Liam Johnson",
+    timeAgo: "2 weeks ago",
+    rating: 5,
+    text: "Had a great experience with the team, especially with David Murray. Very informative and engaging on the dangers of fire and what we can be doing as a business.",
+    source: "Google Reviews"
+  },
+  {
+    id: 7,
+    name: "Olivia Brown",
+    timeAgo: "2 weeks ago",
+    rating: 5,
+    text: "Excellent service and very professional would highly recommend.",
+    source: "Google Reviews"
+  },
+  {
+    id: 8,
+    name: "James Smith",
+    timeAgo: "3 weeks ago",
+    rating: 5,
+    text: "Great service and very professional. Highly recommend.",
+    source: "Google Reviews"
+  }
+];
+
+const overallRating = 4.8;
+const totalReviews = reviews.length;
+
+// Generate star rating as CSS class instead of individual SVGs
+const getStarRating = (rating: number) => {
+  const fullStars = "★".repeat(rating);
+  const emptyStars = "☆".repeat(5 - rating);
+  return fullStars + emptyStars;
+};
+---
+
+<section class="reviews-section bg-gray-50 py-12 lg:py-16">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-8 lg:mb-12">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        What Our Clients Say
+      </h2>
+      <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+        Don't just take our word for it - see what our satisfied clients have to say about our services.
+      </p>
+    </div>
+
+    <!-- Reviews Carousel -->
+    <div class="reviews-carousel" x-data="reviewsCarousel()" data-total-reviews={reviews.length}>
+      <!-- Navigation Buttons - Simplified -->
+      <button 
+        @click="prevSlide()"
+        :disabled="currentSlide === 0"
+        :class="{ 'opacity-50': currentSlide === 0 }"
+        class="nav-btn nav-prev"
+        aria-label="Previous reviews"
+      >‹</button>
+
+      <button 
+        @click="nextSlide()"
+        :disabled="currentSlide >= maxSlides"
+        :class="{ 'opacity-50': currentSlide >= maxSlides }"
+        class="nav-btn nav-next"
+        aria-label="Next reviews"
+      >›</button>
+
+      <div class="carousel-viewport">
+        <div 
+          class="carousel-track"
+          :style="`transform: translateX(-${currentSlide * slideWidth}%)`"
+        >
+          {reviews.map((review, index) => (
+            <article class="review-slide">
+              <div class="review-card">
+                <!-- Stars - Simplified -->
+                <div class="star-rating" title={`${review.rating} stars`}>
+                  {getStarRating(review.rating)}
+                </div>
+
+                <!-- Review Text -->
+                <p class="review-text">{review.text}</p>
+
+                <!-- Reviewer Info -->
+                <footer class="review-footer">
+                  <strong class="reviewer-name">{review.name}</strong>
+                  <time class="review-time">{review.timeAgo}</time>
+                  <small class="review-source">Source: {review.source}</small>
+                </footer>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <!-- Dots Indicator - Only show if more than 1 slide -->
+      <!-- {totalReviews > 4 && (
+        <nav class="carousel-dots" aria-label="Carousel navigation">
+          <template x-for="(dot, index) in Array.from({ length: maxSlides + 1 })" :key="index">
+            <button
+              @click="currentSlide = index"
+              :class="{ 'active': currentSlide === index }"
+              class="dot"
+              :aria-label="`Go to slide ${index + 1}`"
+            ></button>
+          </template>
+        </nav>
+      )} -->
+    </div>
+
+    <!-- Google Reviews Summary -->
+    <div class="reviews-summary">
+      <span class="rating-text">Rated {overallRating}</span>
+      <span class="rating-meta">/ {totalReviews} based on</span>
+      <span class="google-logo" aria-label="Google Reviews">G</span>
+      <span class="google-text">Google Reviews</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Optimized styles for better CWV performance */
+  .reviews-carousel {
+    position: relative;
+    margin: 0 4rem;
+    will-change: transform; /* Optimize for animations */
+  }
+
+  /* Simplified navigation buttons */
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-prev { left: -4rem; }
+  .nav-next { right: -4rem; }
+  .nav-btn:hover:not(:disabled) { transform: translateY(-50%) scale(1.1); }
+  .nav-btn:disabled { cursor: not-allowed; }
+
+  /* Carousel structure */
+  .carousel-viewport {
+    overflow: hidden;
+    border-radius: 0.5rem;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+  }
+
+  /* Review slides */
+  .review-slide {
+    flex: 0 0 100%;
+    padding: 0 0.75rem;
+  }
+
+  .review-card {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    height: 100%;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .review-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* Star rating with Unicode characters */
+  .star-rating {
+    color: #fb923c;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* Review text */
+  .review-text {
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Review footer */
+  .review-footer {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .reviewer-name {
+    display: block;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  .review-time {
+    display: block;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  .review-source {
+    color: #9ca3af;
+  }
+
+  /* Carousel dots */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border: none;
+    border-radius: 50%;
+    background: #d1d5db;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .dot.active {
+    background: #fb923c;
+  }
+
+  /* Google Reviews summary */
+  .reviews-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .rating-text {
+    font-size: 1.125rem;
+    font-weight: bold;
+    color: #111827;
+  }
+
+  .rating-meta {
+    color: #6b7280;
+  }
+
+  .google-logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .google-text {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  /* Responsive design */
+  @media (min-width: 640px) {
+    .review-slide { flex: 0 0 50%; }
+  }
+
+  @media (min-width: 1024px) {
+    .review-slide { flex: 0 0 25%; }
+  }
+
+  @media (max-width: 768px) {
+    .reviews-carousel { margin: 0; }
+    .nav-btn { display: none; }
+  }
+
+  /* Performance optimizations */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Reduce reflows and repaints */
+  .reviews-section {
+    contain: layout style paint;
+  }
+</style>
+
+<script is:inline>
+  // Optimized Alpine.js carousel for better CWV performance
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('reviewsCarousel', () => ({
+      currentSlide: 0,
+      totalReviews: 0,
+      
+      get slidesPerView() {
+        // Use cached value to avoid repeated calculations
+        if (this._cachedSlidesPerView) return this._cachedSlidesPerView;
+        
+        const width = window.innerWidth;
+        this._cachedSlidesPerView = width >= 1024 ? 4 : width >= 640 ? 2 : 1;
+        return this._cachedSlidesPerView;
+      },
+      
+      get slideWidth() {
+        return 100 / this.slidesPerView;
+      },
+      
+      get maxSlides() {
+        return Math.max(0, this.totalReviews - this.slidesPerView);
+      },
+      
+      nextSlide() {
+        if (this.currentSlide < this.maxSlides) {
+          this.currentSlide++;
+        }
+      },
+      
+      prevSlide() {
+        if (this.currentSlide > 0) {
+          this.currentSlide--;
+        }
+      },
+      
+      init() {
+        // Get total reviews from data attribute
+        this.totalReviews = parseInt(this.$el.dataset.totalReviews || '0');
+        
+        // Throttled resize handler for better performance
+        let resizeTimeout;
+        const handleResize = () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            this._cachedSlidesPerView = null; // Clear cache
+            if (this.currentSlide > this.maxSlides) {
+              this.currentSlide = Math.max(0, this.maxSlides);
+            }
+          }, 150);
+        };
+        
+        window.addEventListener('resize', handleResize, { passive: true });
+        
+        // Cleanup on destroy
+        this.$el._cleanup = () => {
+          window.removeEventListener('resize', handleResize);
+        };
+      }
+    }));
+  });
+</script>
