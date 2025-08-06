@@ -1,0 +1,14 @@
+---
+// src/components/Button.astro
+const { type = 'button', variant = 'primary', children } = Astro.props;
+const baseStyles = 'px-4 py-2 rounded-md text-sm font-semibold transition-all';
+const variants = {
+  primary: 'bg-blue-600 text-white hover:bg-blue-700',
+  secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+  danger: 'bg-red-600 text-white hover:bg-red-700',
+};
+---
+
+<button type={type} class={`${baseStyles} ${variants[variant]}`}>
+  {children}
+</button>
