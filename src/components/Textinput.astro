@@ -1,0 +1,35 @@
+---
+// src/components/TextInput.astro
+const {
+  id,
+  label,
+  placeholder,
+  type = 'text',
+  variant = 'default',
+  required = false,
+  error = ''
+} = Astro.props;
+
+const baseStyles = 'w-full px-4 py-2 rounded-md border text-sm focus:outline-none';
+const variants = {
+  default: 'border-gray-300 focus:ring-2 focus:ring-blue-500',
+  danger: 'border-red-500 focus:ring-2 focus:ring-red-300',
+  success: 'border-green-500 focus:ring-2 focus:ring-green-300',
+};
+
+const resolvedVariant = error ? 'danger' : variant;
+---
+
+<div class="flex flex-col gap-1">
+  {label && <label for={id} class="text-sm font-medium text-gray-700">{label}</label>}
+  <input
+    id={id}
+    type={type}
+    name={id}
+    required={required}
+    placeholder={placeholder}
+    class={`${baseStyles} ${variants[resolvedVariant]}`}
+    aria-invalid={error ? 'true' : 'false'}
+  />
+  {error && <p class="text-sm text-red-600 mt-1">{error}</p>}
+</div>
