@@ -1,0 +1,25 @@
+---
+// src/components/MarketoForm.astro
+// Props: munchkinId (string), formId (number), fallbackForm (slot)
+
+const { munchkinId, formId } = Astro.props;
+---
+
+<div
+  x-data="{
+    formLoaded: false,
+    initForm() {
+      MktoForms2.loadForm('//app-sj01.marketo.com', '${munchkinId}', ${formId}, (form) => {
+        this.formLoaded = true;
+      });
+    }
+  }"
+  x-init="initForm()"
+  class="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md"
+>
+  <div x-show="!formLoaded">
+    <slot name="fallbackForm" />
+  </div>
+
+  <form x-show="formLoaded" id="mktoForm_${formId}" class="space-y-4"></form>
+</div>
