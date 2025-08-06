@@ -1,0 +1,14 @@
+---
+// src/components/NewsletterForm.astro
+import MarketoForm from './MarketoForm.astro';
+import TextInput from './TextInput.astro';
+import Button from './Button.astro';
+---
+
+<MarketoForm munchkinId="YOUR_MUNCHKIN_ID" formId={1234}>
+  <div slot="fallbackForm" class="space-y-4">
+    <h2 class="text-xl font-semibold mb-4 text-center">Subscribe to our Newsletter</h2>
+    <TextInput id="email" label="Email" placeholder="you@example.com" type="email" required={true} />
+    <Button type="submit" variant="primary">Subscribe</Button>
+  </div>
+</MarketoForm>
