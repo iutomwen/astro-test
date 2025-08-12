@@ -1,0 +1,71 @@
+'use client';
+
+import { useState, useEffect, useRef, ComponentType } from 'react';
+import dynamic from 'next/dynamic';
+
+type LazyLoaderProps = {
+  loader: () => Promise<{ default: ComponentType<any> }>;
+  height?: number; // reserve space to prevent CLS
+  fallback?: React.ReactNode;
+};
+
+/**
+ * Generic intersection observer loader
+ * Dynamically imports a client component when it becomes visible.
+ */
+export default function LazyLoader({
+  loader,
+  height = 300,
+  fallback = <div style={{ height }}>Loading…</div>,
+}: LazyLoaderProps) {
+  const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Only create dynamic component after visibility
+  const [DynamicComp, setDynamicComp] = useState<ComponentType<any> | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShow(true);
+        observer.disconnect();
+      }
+    });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Dynamically import once visible
+  useEffect(() => {
+    if (show) {
+      const Dyn = dynamic(loader, { ssr: false });
+      setDynamicComp(() => Dyn);
+    }
+  }, [show, loader]);
+
+  return <div ref={ref}>{DynamicComp ? <DynamicComp /> : fallback}</div>;
+}
+
+
+<LazyLoader
+  loader={() =>
+    import('@/components/MyCarousel').then((mod) => ({
+      default: mod.MyCarousel,
+    }))
+  }
+  height={350}
+  fallback={<div style={{ height: 350 }}>Carousel loading…</div>}
+/>
+
+
+<LazyLoader
+  loader={() => import('@/components/HeavyChart')}
+  height={400}
+  fallback={<div style={{ height: 400 }}>Chart loading…</div>}
+/>
+
+<LazyLoader
+  loader={() => import('@/components/MapWidget')}
+  height={500}
+  fallback={<div style={{ height: 500 }}>Map loading…</div>}
+/>
