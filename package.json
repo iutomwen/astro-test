@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.4.8",
+    "@astrojs/node": "^9.4.3",
+    "@builder.io/qwik": "^1.16.0",
+    "@qwikdev/astro": "^0.8.2",
     "@tailwindcss/vite": "^4.1.11",
     "@types/alpinejs": "^3.13.11",
     "alpinejs": "^3.14.9",

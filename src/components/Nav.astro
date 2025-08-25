@@ -1,8 +1,9 @@
 ---
 import Drawer from "./Drawer.astro";
-import MegaMenu from "./MegaMenu.astro";
+// import MegaMenu from "./MegaMenu.astro";
 import { primaryNav, secondaryNav } from "../data/navData";
 import NavItem from "./NavItem.astro";
+import MegaMenu from "./qwik";
 ---
 
 <style>
@@ -31,7 +32,7 @@ import NavItem from "./NavItem.astro";
 
         <!-- Main Navigation -->
         <div class="flex items-center space-x-8">
-          <MegaMenu primaryNav={primaryNav} />
+          <MegaMenu primaryNav={primaryNav} client:load />
         </div>
 
         <!-- Contact & Menu -->

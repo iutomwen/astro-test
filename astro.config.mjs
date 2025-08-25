@@ -5,21 +5,25 @@ import alpinejs from '@astrojs/alpinejs';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import qwikdev from '@qwikdev/astro';
+
+import node from '@astrojs/node';
+
 // https://astro.build/config
 export default defineConfig({
-  integrations: [alpinejs()],
-  
+  integrations: [alpinejs(), qwikdev()],
+
   // Performance optimizations
   build: {
     inlineStylesheets: 'auto',
     assetsPrefix: '',
   },
-  
+
   // Image optimization
   image: {
     domains: ['picsum.photos'],
   },
-  
+
   // Prefetch optimization
   prefetch: {
     prefetchAll: false,
@@ -32,13 +36,17 @@ export default defineConfig({
       // CSS code splitting
       cssCodeSplit: true,
       // Rollup optimizations
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['alpinejs']
-          }
-        }
-      }
+      // rollupOptions: {
+      //   output: {
+      //     manualChunks: {
+      //       vendor: ['alpinejs']
+      //     }
+      //   }
+      // }
     }
-  }
+  },
+
+  adapter: node({
+    mode: 'standalone'
+  })
 });
