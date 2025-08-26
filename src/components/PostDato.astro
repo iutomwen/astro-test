@@ -1,0 +1,47 @@
+---
+import DatoStructuredText from "../../components/DatoStructuredText.astro";
+import MyImage from "../../components/MyImage.astro";
+import Badge from "../../components/Badge.astro";
+
+// assume you've fetched `post` and built blocksById/inlineRecordsById/linksById...
+---
+
+<h1>{post.title}</h1>
+
+<DatoStructuredText
+  content={post.content.value}
+  blocksById={blocksById}
+  inlineRecordsById={inlineRecordsById}
+  linksById={linksById}
+  blockRenderers={{
+    image_block: (rec) => `
+      <MyImage src="${rec.image.url}" alt="${rec.image.alt}" width="${rec.image.width}" height="${rec.image.height}" />
+    `,
+  }}
+  renderInlineRecord={(rec) => {
+    if (rec.__typename === "BadgeRecord") {
+      return `<Badge label="${rec.label}" color="${rec.color}" />`;
+    }
+    return `<span>${rec.id}</span>`;
+  }}
+  classes={{
+    paragraph: "text-lg leading-relaxed mb-4 text-gray-800",
+    heading: (lvl) =>
+      lvl === 1 ? "text-3xl font-bold mb-6" : "text-2xl font-semibold mt-6 mb-3",
+    list: (type) =>
+      type === "bulleted" ? "list-disc ml-6 space-y-1" : "list-decimal ml-6 space-y-1",
+    listItem: "text-gray-700",
+    link: "text-blue-600 underline hover:text-blue-800",
+    hr: "my-8 border-t border-gray-300",
+    code: "bg-gray-100 p-2 rounded",
+  }}
+/>
+
+<!-- elsewhere you could use totally different styles -->
+<DatoStructuredText
+  content={otherPost.content.value}
+  classes={{
+    paragraph: "font-serif text-red-700",
+    link: "text-red-500 hover:text-red-700 underline",
+  }}
+/>
