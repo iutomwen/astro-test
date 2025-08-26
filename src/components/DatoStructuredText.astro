@@ -1,0 +1,150 @@
+---
+import { render, renderRule } from "@datocms/structured-text-to-html";
+import {
+  isParagraph,
+  isList,
+  isListItem,
+  isHeading,
+  isThematicBreak,
+  isCode,
+  isBlock,
+  isInlineItem,
+  isLink,
+  type InlineItem,
+  type Block,
+  type Link,
+} from "datocms-structured-text-utils";
+
+type RecordLike = {
+  id: string;
+  __typename?: string;
+  _modelApiKey?: string;
+  slug?: string;
+  url?: string;
+  [k: string]: any;
+};
+
+type Props = {
+  content: unknown;
+  blocksById?: Record<string, RecordLike>;
+  inlineRecordsById?: Record<string, RecordLike>;
+  linksById?: Record<string, RecordLike>;
+
+  blockRenderers?: Record<string, (record: RecordLike) => string>;
+  renderInlineRecord?: (record: RecordLike) => string;
+  resolveRecordUrl?: (record: RecordLike) => string;
+
+  // 🎨 style class maps
+  classes?: {
+    paragraph?: string;
+    heading?: (level: number) => string;
+    list?: (type: "bulleted" | "numbered") => string;
+    listItem?: string;
+    link?: string;
+    hr?: string;
+    code?: string;
+  };
+};
+
+const {
+  content,
+  blocksById = {},
+  inlineRecordsById = {},
+  linksById = {},
+  blockRenderers = {},
+  renderInlineRecord = (rec) =>
+    `<span data-inline="${rec._modelApiKey || rec.__typename}">${rec.id}</span>`,
+  resolveRecordUrl = (rec) => {
+    const slug = rec.slug || rec.id;
+    return `/${rec._modelApiKey || rec.__typename}/${slug}`;
+  },
+  classes = {},
+} = Astro.props as Props;
+
+function getRecord(id: string): RecordLike | undefined {
+  return inlineRecordsById[id] || blocksById[id] || linksById[id];
+}
+
+const html = render(content as any, {
+  renderNode: [
+    // Headings
+    renderRule(isHeading, ({ node, children }) => {
+      const level = Math.min(6, Math.max(1, node.level || 2));
+      const cls = classes.heading ? classes.heading(level) : "";
+      return `<h${level}${cls ? ` class="${cls}"` : ""}>${children}</h${level}>`;
+    }),
+
+    // Paragraphs
+    renderRule(isParagraph, ({ children }) => {
+      const cls = classes.paragraph || "";
+      return `<p${cls ? ` class="${cls}"` : ""}>${children}</p>`;
+    }),
+
+    // Lists
+    renderRule(isList, ({ node, children }) => {
+      const type = node.style === "bulleted" ? "bulleted" : "numbered";
+      const tag = type === "bulleted" ? "ul" : "ol";
+      const cls = classes.list ? classes.list(type) : "";
+      return `<${tag}${cls ? ` class="${cls}"` : ""}>${children}</${tag}>`;
+    }),
+    renderRule(isListItem, ({ children }) => {
+      const cls = classes.listItem || "";
+      return `<li${cls ? ` class="${cls}"` : ""}>${children}</li>`;
+    }),
+
+    // Horizontal rule
+    renderRule(isThematicBreak, () => {
+      const cls = classes.hr || "";
+      return `<hr${cls ? ` class="${cls}"` : ""} />`;
+    }),
+
+    // Code blocks
+    renderRule(isCode, ({ node }) => {
+      const cls = classes.code || "";
+      const lang = node.language ? ` class="language-${node.language}"` : "";
+      return `<pre><code${lang} ${cls}>${node.code}</code></pre>`;
+    }),
+
+    // Inline items
+    renderRule(isInlineItem, ({ node }) => {
+      const rec = getRecord((node as InlineItem).item);
+      if (!rec) return "";
+      if (rec.__typename === "UploadRecord") {
+        return `<MyImage src="${rec.url}" alt="${rec.alt || ""}" width="${rec.width}" height="${rec.height}" />`;
+      }
+      return renderInlineRecord(rec);
+    }),
+
+    // Blocks
+    renderRule(isBlock, ({ node }) => {
+      const rec = getRecord((node as Block).item);
+      if (!rec) return "";
+      const key = rec._modelApiKey || rec.__typename || "record";
+      const renderer = blockRenderers[key];
+      if (renderer) return renderer(rec);
+      return `<div data-block="${key}">${rec.id}</div>`;
+    }),
+
+    // Links
+    renderRule(isLink, ({ node, children }) => {
+      const linkNode = node as Link;
+      const cls = classes.link || "";
+
+      if ("url" in linkNode && linkNode.url) {
+        return `<a href="${linkNode.url}"${cls ? ` class="${cls}"` : ""}>${children}</a>`;
+      }
+
+      if ("item" in linkNode && linkNode.item) {
+        const rec = getRecord(linkNode.item);
+        if (!rec) return `<span>${children}</span>`;
+        const href = resolveRecordUrl(rec);
+        return `<a href="${href}"${cls ? ` class="${cls}"` : ""}>${children}</a>`;
+      }
+
+      return `<span>${children}</span>`;
+    }),
+  ],
+});
+---
+
+<div class="dato-structured-text" set:html={html} />
