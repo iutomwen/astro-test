@@ -158,3 +158,22 @@ if (require.main === module) {
 }
 
 
+const chunks = [];
+for (let i = 0; i < allSlugs.length; i += 50) {
+  chunks.push(allSlugs.slice(i, i + 50));
+}
+
+for (const group of chunks) {
+  await Promise.all(
+    group.map(async ({ slug }) => {
+      const { blog } = await client.request(BLOG_BY_SLUG_QUERY, { slug, locale });
+      await fs.writeJSON(
+        path.join(localeDir, `${slug}.json`),
+        blog,
+        { spaces: 2 }
+      );
+    })
+  );
+}
+
+
