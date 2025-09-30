@@ -176,4 +176,66 @@ for (const group of chunks) {
   );
 }
 
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // === Handle /ie rules ===
+    if (url.pathname === "/ie" || url.pathname === "/ie/") {
+      // Redirect /ie (with or without slash) to root of newsite.com
+      return Response.redirect(`https://newsite.com/${url.search}`, 301);
+    }
+
+    if (url.pathname === "/ie/elearning" || url.pathname.startsWith("/ie/elearning/")) {
+      // Keep elearning section on example.com (no redirect)
+      // Just fall back to your normal routing
+    } else if (url.pathname.startsWith("/ie/")) {
+      // Redirect all other /ie/* requests
+      const newPath = url.pathname.substring(4); // remove only the first "/ie/"
+      const redirectUrl = `https://newsite.com${newPath}${url.search}`;
+      return Response.redirect(redirectUrl, 301);
+    }
+
+    // === Existing routing logic ===
+    if (url.pathname.startsWith("/new")) {
+      return fetch(`https://new.pages.dev${url.pathname}${url.search}`, request);
+    } else {
+      return fetch(`https://old.pages.dev${url.pathname}${url.search}`, request);
+    }
+  }
+};
+
+
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // === Handle /ie rules ===
+    if (url.pathname === "/ie" || url.pathname === "/ie/") {
+      // Redirect /ie (with or without slash) to root of newsite.com
+      return Response.redirect(`https://newsite.com/${url.search}`, 301);
+    }
+
+    if (url.pathname === "/ie/elearning" || url.pathname.startsWith("/ie/elearning/")) {
+      // Keep elearning section on example.com (no redirect)
+      // Just fall back to your normal routing
+    } else if (url.pathname.startsWith("/ie/")) {
+      // Redirect all other /ie/* requests
+      const newPath = url.pathname.replace(/^\/ie\//, ""); // strip "/ie/"
+      const redirectUrl = `https://newsite.com/${newPath}${url.search}`;
+      return Response.redirect(redirectUrl, 301);
+    }
+
+    // === Existing routing logic ===
+    if (url.pathname.startsWith("/new")) {
+      return fetch(`https://new.pages.dev${url.pathname}${url.search}`, request);
+    } else {
+      return fetch(`https://old.pages.dev${url.pathname}${url.search}`, request);
+    }
+  }
+};
+
+
+
+
 
