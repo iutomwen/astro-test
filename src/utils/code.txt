@@ -69,3 +69,263 @@ export default function LazyLoader({
   height={500}
   fallback={<div style={{ height: 500 }}>Map loading…</div>}
 />
+
+
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        lexend: ['var(--font-lexend)', 'system-ui', 'sans-serif'],
+      },
+    },
+  },
+}
+
+export default config
+
+import './globals.css'
+import { lexend } from './fonts'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={`${lexend.variable}`}>
+      <body>{children}</body>
+    </html>
+  )
+}
+
+import { Lexend } from 'next/font/google'
+
+export const lexend = Lexend({
+  subsets: ['latin'],
+  display: 'swap',          // ✅ ensures fallback renders instantly
+  variable: '--font-lexend', // ✅ register as CSS variable for Tailwind
+  weight: ['400', '500', '600', '700'], // adjust as needed
+  adjustFontFallback: true, // ✅ prevents layout shift when swapping
+})
+
+
+import Image from 'next/image';
+
+export default function Hero() {
+  return (
+    <section className="relative flex items-center justify-center h-[80vh] overflow-hidden">
+      {/* ✅ Background image loads ONLY on desktop */}
+      <Image
+        src="/hero-desktop.jpg"
+        alt=""
+        fill
+        priority
+        sizes="(min-width: 768px) 100vw, 0px"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center',
+          zIndex: 0,
+        }}
+      />
+
+      {/* ✅ Gradient overlay (softens image and improves text contrast) */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.6) 100%)',
+          zIndex: 1,
+        }}
+      ></div>
+
+      {/* ✅ Text content */}
+      <div className="relative z-10 text-center text-white px-6 max-w-2xl">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          Your Story Starts Here
+        </h1>
+        <p className="text-lg md:text-xl mb-6 text-gray-100">
+          Beautifully crafted experiences for every screen.
+        </p>
+        <a
+          href="#get-started"
+          className="inline-block bg-white text-black px-6 py-3 rounded font-semibold hover:bg-gray-100 transition"
+        >
+          Get Started
+        </a>
+      </div>
+    </section>
+  );
+}
+
+
+<picture>
+  <source
+    media="(max-width: 767px)"
+    srcSet="" /* empty to skip mobile */
+  />
+  <source
+    media="(min-width: 768px)"
+    srcSet="/hero-desktop.jpg"
+  />
+  <img
+    src=""
+    alt=""
+    style={{ width: '100%', height: '80vh', objectFit: 'cover' }}
+  />
+</picture>
+
+
+----- todo later ------
+
+/* globals.css */
+.highlighted-text {
+  position: relative;
+  display: inline-block;
+}
+
+.highlighted-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0.1em;
+  width: 100%;
+  height: 0.25em;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  pointer-events: none;
+}
+
+
+'use client'
+
+import { useEffect } from 'react'
+
+export function useHighlightUnderline(selector = '.highlighted-text') {
+  useEffect(() => {
+    // run in idle time, post-paint
+    const run = () => {
+      const els = document.querySelectorAll<HTMLElement>(selector)
+      els.forEach((el) => {
+        // Skip if already processed
+        if (el.dataset.svgApplied) return
+        el.dataset.svgApplied = 'true'
+
+        // apply background as data URI (async to avoid main-thread block)
+        requestIdleCallback?.(() => {
+          el.style.setProperty(
+            '--underline-svg',
+            `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 20' preserveAspectRatio='none'><path d='M0 10 Q200 25 400 10' stroke='%23e60028' stroke-width='4' fill='none'/></svg>")`
+          )
+          el.style.backgroundImage = 'var(--underline-svg)'
+          const pseudo = window.getComputedStyle(el, '::after')
+          // Trigger fade-in
+          el.style.setProperty('--underline-opacity', '1')
+          el.classList.add('underline-ready')
+        })
+      })
+    }
+
+    // Use requestIdleCallback or fallback to timeout
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(run, { timeout: 2000 })
+    } else {
+      setTimeout(run, 500)
+    }
+  }, [selector])
+}
+
+import { StructuredText } from 'react-datocms'
+import { useHighlightUnderline } from '@/app/hooks/useHighlightUnderline'
+
+export function ArticleBody({ data }) {
+  useHighlightUnderline()
+
+  return (
+    <div className="prose">
+      <StructuredText
+        data={data.content}
+        renderMark={({ mark, children }) => {
+          if (mark === 'highlight') {
+            return <span className="highlighted-text">{children}</span>
+          }
+          return children
+        }}
+      />
+    </div>
+  )
+}
+
+
+'use client'
+
+import { useEffect } from 'react'
+
+export function useHighlightUnderline(
+  selector = '.highlighted-text',
+  svgPath = '/assets/underline.svg'
+) {
+  useEffect(() => {
+    const applyUnderline = () => {
+      const elements = document.querySelectorAll<HTMLElement>(selector)
+      elements.forEach((el) => {
+        if (el.dataset.underlineApplied) return // avoid duplicate
+        el.dataset.underlineApplied = 'true'
+
+        // Apply underline lazily in an idle frame (non-blocking)
+        requestIdleCallback?.(() => {
+          // Use inline style so it doesn’t trigger layout reflow globally
+          el.style.setProperty('--underline-image', `url(${svgPath})`)
+          el.style.setProperty('--underline-opacity', '1')
+
+          // Apply background image via pseudo-element
+          el.style.setProperty('position', 'relative')
+          el.style.setProperty('--underline-opacity', '1')
+
+          // Directly set ::after background
+          const sheet = document.createElement('style')
+          sheet.textContent = `
+            [data-underline-applied="true"]::after {
+              background-image: url(${svgPath});
+              opacity: 1;
+            }
+          `
+          document.head.appendChild(sheet)
+        })
+      })
+    }
+
+    // Run after LCP to avoid blocking paint
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(applyUnderline, { timeout: 2000 })
+    } else {
+      setTimeout(applyUnderline, 600)
+    }
+  }, [selector, svgPath])
+}
+
+
+import { StructuredText } from 'react-datocms'
+import { useHighlightUnderline } from '@/app/hooks/useHighlightUnderline'
+
+export function ArticleBody({ data }) {
+  // Initialize the underline enhancement (client-side only)
+  useHighlightUnderline('.highlighted-text', '/assets/underline.svg')
+
+  return (
+    <div className="prose">
+      <StructuredText
+        data={data.content}
+        renderMark={({ mark, children }) => {
+          if (mark === 'highlight') {
+            return <span className="highlighted-text">{children}</span>
+          }
+          return children
+        }}
+      />
+    </div>
+  )
+}
+
+
+
