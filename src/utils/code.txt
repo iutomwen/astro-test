@@ -327,5 +327,116 @@ export function ArticleBody({ data }) {
   )
 }
 
+export const metadata = {
+  title: "My Site",
+  other: {
+    link: [
+      { rel: "preconnect", href: "https://cdn.cookielaw.org" },
+      { rel: "dns-prefetch", href: "https://cdn.cookielaw.org" },
+    ],
+  },
+};
+
+// app/components/OneTrustLoader.tsx
+"use client";
+
+import Script from "next/script";
+
+export default function OneTrustLoader() {
+  return (
+    <>
+      {/* Load non-blocking */}
+      <Script
+        src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+        strategy="afterInteractive"
+        data-domain-script="YOUR-DOMAIN-ID"
+      />
+      <Script id="onetrust-wrapper" strategy="afterInteractive">
+        {`function OptanonWrapper() { }`}
+      </Script>
+    </>
+  );
+}
+
+// app/docs/my-document/page.tsx
+export const metadata = {
+  title: "My Document | My Site",
+  description: "Read our detailed PDF securely on this page.",
+  robots: { index: true, follow: true },
+};
+
+export default function Page() {
+  return (
+    <main>
+      <h1>My Document</h1>
+      <object
+        data="/api/pdf"
+        type="application/pdf"
+        width="100%"
+        height="800px"
+      >
+        <p>
+          Your browser does not support PDFs.
+          <a href="/api/pdf" rel="nofollow noopener">
+            View here
+          </a>.
+        </p>
+      </object>
+    </main>
+  );
+}
+
+
+// app/api/pdf/route.ts
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+
+export async function GET() {
+  const filePath = path.join(process.cwd(), "protected", "my.pdf");
+  const fileBuffer = fs.readFileSync(filePath);
+
+  // Set headers to prevent download
+  const response = new NextResponse(fileBuffer);
+  response.headers.set("Content-Type", "application/pdf");
+  response.headers.set("Content-Disposition", "inline"); // ensures it opens inline, not as a download
+  response.headers.set("Cache-Control", "no-store");
+
+  // Optional: block save-as in some browsers (not foolproof)
+  response.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; frame-ancestors 'none';"
+  );
+
+  return response;
+}
+
+
+// app/api/pdf/route.ts
+export const runtime = "edge";
+
+export async function GET(req: Request) {
+  const referer = req.headers.get("referer") || "";
+
+  if (!referer.startsWith("https://yourdomain.com/docs")) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  const pdfResponse = await fetch(`${req.url.origin}/_next/static/my.pdf`);
+  if (!pdfResponse.ok) return new Response("Not found", { status: 404 });
+
+  const arrayBuffer = await pdfResponse.arrayBuffer();
+
+  return new Response(arrayBuffer, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "inline",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+
+
 
 
