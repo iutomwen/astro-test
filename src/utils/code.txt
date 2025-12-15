@@ -439,4 +439,32 @@ export async function GET(req: Request) {
 
 
 
+git checkout -b upgrade/tailwind-v4
+
+npm uninstall tailwindcss postcss autoprefixer
+npm install tailwindcss@latest
+
+
+delete 
+
+postcss.config.js
+
+
+old
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+new
+@import "tailwindcss";
+
+
+
+
+fix prefilight 
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+
+
 
