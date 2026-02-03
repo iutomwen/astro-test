@@ -1,0 +1,53 @@
+name: DatoCMS → Parallel Pages + OpenNext
+
+on:
+  repository_dispatch:
+    types: [dato_content_update]
+
+concurrency:
+  group: dato-deploy
+  cancel-in-progress: false
+
+jobs:
+  trigger-open-next:
+    name: Trigger OpenNext (Parallel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch OpenNext workflow
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.OPEN_NEXT_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/<ORG>/<OPEN_NEXT_REPO>/dispatches \
+            -d '{
+              "event_type": "dato_content_update",
+              "client_payload": {
+                "source": "datocms",
+                "parallel": true
+              }
+            }'
+
+  build-and-deploy-pages:
+    name: Build & Deploy Next-on-Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Deploy Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: next-on-pages
+          directory: .vercel/output/static
