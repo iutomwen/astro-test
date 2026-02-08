@@ -15,6 +15,7 @@ export default {
 
 import { cacheNextImage } from "./cache-next-image"
 import { cacheNextAsset } from "./cache-next-assets"
+import { cacheHTML } from "./cache-html"
 
 function routeToNext(url: URL) {
   return (
@@ -27,15 +28,19 @@ function routeToNext(url: URL) {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 
-    // 1️⃣ IMAGE CACHE (biggest win)
+    // 1️⃣ images
     const image = await cacheNextImage(request, env, ctx)
     if (image) return image
 
-    // 2️⃣ STATIC + DATA + RSC CACHE
+    // 2️⃣ next assets
     const asset = await cacheNextAsset(request, env, ctx)
     if (asset) return asset
 
-    // 3️⃣ ROUTING
+    // 3️⃣ HTML pages (major LCP improvement)
+    const html = await cacheHTML(request, env, ctx)
+    if (html) return html
+
+    // 4️⃣ routing
     const url = new URL(request.url)
 
     if (routeToNext(url)) {
@@ -45,7 +50,6 @@ export default {
     return env.GATSBY.fetch(request)
   }
 }
-
 
 import Script from "next/script"
 
