@@ -8,3 +8,12 @@ export default {
     )
   },
 }
+
+
+
+import Script from "next/script"
+
+<Script
+  src="https://app-lon04.marketo.com/js/forms2.min.js"
+  strategy="lazyOnload"
+/>
