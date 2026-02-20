@@ -1,0 +1,435 @@
+Step 1 — Keep OneTrust Consent in Your Codebase
+
+✅ You already have this — perfect.
+	•	OneTrust controls whether users allow cookies/tracking.
+	•	It must load before any analytics or marketing tags.
+	•	No need to put it in GTM. Just make sure it’s running as part of your Next.js app, early in the page.
+
+⸻
+
+Step 2 — Setup GA4 Configuration in GTM
+	1.	Go to GTM → Tags → New → GA4 Configuration
+	2.	Enter your GA4 Measurement ID
+	3.	Turn off “Send pageview event on load”
+	•	We’ll fire pageviews manually so we don’t double-count in SPA navigation.
+	4.	Trigger: Initialization → All Pages
+	•	This ensures GA4 config loads immediately.
+
+Why: The config must exist immediately, but we control when the actual pageview fires.
+
+⸻
+
+Step 3 — Capture UTMs & Referrer
+	1.	Inside GTM, create Variables:
+	•	Page URL → built-in
+	•	Page Path → built-in
+	•	Referrer → built-in
+	•	Optional: Capture utm_source, utm_medium, utm_campaign from URL
+	2.	We’ll send these along when firing the pageview manually.
+
+⸻
+
+Step 4 — Fire Pageview Manually (SPA-Friendly)
+
+Because Next.js App Router doesn’t reload the page on navigation, we need to push a pageview every time the route changes.
+
+Steps for Next.js:
+	1.	Create a small React component (you can call it GA4PageTracker)
+	2.	Paste this code:
+
+"use client";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+
+export default function GA4PageTracker() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    const url = pathname + (searchParams?.toString() ? `?${searchParams}` : "");
+
+    window.dataLayer.push({
+      event: "virtual_pageview",
+      page_location: window.location.href,
+      page_path: url,
+      page_title: document.title,
+      page_referrer: document.referrer,
+    });
+  }, [pathname, searchParams]);
+
+  return null;
+}
+
+
+3.	Mount this once in your root layout (so it runs on every route change).
+
+Why: This ensures GA4 receives one pageview per route, no duplicates.
+
+⸻
+
+Step 5 — Setup Marketing Tags Delay
+
+All heavy third-party tags (Meta, TikTok, LinkedIn, Reddit, VWO, Clarity, StackAdapt):
+	1.	In GTM, create a Custom Event Trigger called marketing_ready
+	2.	For each heavy tag, replace their triggers with marketing_ready
+	3.	In your Next.js app, push the event after a delay or user interaction:
+
+"use client"; // very important
+import { useEffect } from "react";
+
+export default function MarketingTrigger() {
+  useEffect(() => {
+    const fireMarketing = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "marketing_ready" });
+    };
+
+    // Fire automatically after 4 seconds
+    const timer = setTimeout(fireMarketing, 4000);
+
+    // Fire early if user interacts
+    window.addEventListener("click", fireMarketing, { once: true });
+    window.addEventListener("scroll", fireMarketing, { once: true });
+
+    // Clean up on unmount
+    return () => clearTimeout(timer);
+  }, []);
+
+  return null; // This component renders nothing
+}
+
+
+Why:
+	•	GA4 fires immediately → accurate tracking
+	•	Heavy tags fire after delay or user interaction → better CWV
+	•	You still capture most sessions without losing initial pageview
+
+⸻
+
+✅ Step 6 — Double-Check
+	•	Open your site and use GTM Preview mode
+	•	Check dataLayer:
+
+	1.	virtual_pageview fires immediately on page load
+	2.	marketing_ready fires only after delay or interaction
+	3.	GA4 receives proper pageview, UTM, and referrer
+	4.	Heavy scripts load later → performance stays good
+
+⸻
+
+Plain Summary
+	1.	OneTrust → loads in code (always first)
+	2.	GA4 config → loads immediately, but pageview is manual
+	3.	GA4 pageview → fired on every route change via small React tracker
+	4.	UTMs + Referrer → captured in the pageview event
+	5.	Heavy marketing tags → delayed via marketing_ready trigger
+	6.	User interaction → can fire heavy tags early if they click/scroll
+
+
+
+GA4PageTracker
+	•	Purpose: Fires the GA4 pageview every time the route changes (SPA navigation safe).
+	•	Mount it once in root layout, so it always runs when the user navigates.
+	•	Handles:
+	•	page_location
+	•	page_path
+	•	page_title
+	•	page_referrer
+	•	UTMs
+
+⸻
+
+2️⃣ MarketingTrigger
+	•	Purpose: Fires the marketing_ready event to trigger all heavy third-party scripts after a delay or on user interaction.
+	•	Mount it once in root layout, so it can delay marketing tags consistently.
+
+
+"use client";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+
+export default function GA4PageTracker() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+
+    const url = pathname + (searchParams?.toString() ? `?${searchParams}` : "");
+
+    // Push pageview for GA4
+    window.dataLayer.push({
+      event: "virtual_pageview",
+      page_location: window.location.href,
+      page_path: url,
+      page_title: document.title,
+      page_referrer: document.referrer,
+    });
+  }, [pathname, searchParams]);
+
+  return null; // renders nothing
+}
+
+
+
+"use client";
+import { useEffect } from "react";
+
+export default function MarketingTrigger() {
+  useEffect(() => {
+    const fireMarketing = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "marketing_ready" });
+    };
+
+    // Fire automatically after 4 seconds
+    const timer = setTimeout(fireMarketing, 4000);
+
+    // Fire early if user interacts
+    window.addEventListener("click", fireMarketing, { once: true });
+    window.addEventListener("scroll", fireMarketing, { once: true });
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return null; // renders nothing
+}
+
+
+import GA4PageTracker from "../components/GA4PageTracker";
+import MarketingTrigger from "../components/MarketingTrigger";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        {/* OneTrust Consent Script */}
+        <script
+          type="text/javascript"
+          src="https://cdn.cookielaw.org/consent/some-one-trust-id.js"
+          data-document-language="true"
+          async
+        ></script>
+
+        {/* GTM Snippet */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-XXXX');`,
+          }}
+        ></script>
+      </head>
+      <body>
+        {children}
+
+        {/* GA4 SPA Pageview Tracker */}
+        <GA4PageTracker />
+
+        {/* Delayed marketing scripts */}
+        <MarketingTrigger />
+      </body>
+    </html>
+  );
+}
+
+
+┌───────────────────────┐
+│   Browser starts load  │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────┐
+│  1️⃣ OneTrust Consent  │
+│   - Loads immediately │
+│   - Controls which   │
+│     tags can fire    │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────┐
+│  2️⃣ GTM Snippet      │
+│   - Loads immediately │
+│   - Only GA4 config   │
+│     tag is allowed    │
+│   - Pageview disabled │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────────────┐
+│  3️⃣ GA4PageTracker (Client)  │
+│   - Fires 'virtual_pageview'  │
+│   - Captures:                 │
+│       • page_location         │
+│       • page_path             │
+│       • page_title            │
+│       • page_referrer         │
+│       • UTM parameters        │
+│   - Runs on initial load +    │
+│     SPA route changes         │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────────────┐
+│  4️⃣ MarketingTrigger (Client)│
+│   - Fires 'marketing_ready'   │
+│   - Only after:               │
+│       • 4-second delay OR     │
+│       • First user click/scroll
+│   - Triggers all heavy tags: │
+│       • Meta Pixel            │
+│       • TikTok Pixel          │
+│       • LinkedIn Insight Tag  │
+│       • Reddit Pixel          │
+│       • StackAdapt            │
+│       • VWO (A/B testing)     │
+│       • Clarity (heatmaps)    │
+└───────────┬───────────┘
+            │
+            ▼
+┌───────────────────────────────┐
+│  5️⃣ Heavy Tags Execute       │
+│   - Happens **after delay**   │
+│   - CWV impact minimized      │
+│   - Attribution & data still  │
+│     captured (GA4 + UTM)     │
+└───────────────────────────────┘
+
+
+
+GTM Tag Setup for Form Submit
+
+Inside GTM:
+	1.	Create a Trigger → Custom Event → form_submit
+	2.	Create a GA4 Event Tag:
+
+	•	Event Name: form_submission
+	•	Parameters:
+	•	form_name → {{form_name}}
+	•	utm_source → {{utm_source}}
+	•	utm_medium → {{utm_medium}}
+	•	utm_campaign → {{utm_campaign}}
+
+	3.	Trigger the GA4 Event on the form_submit event from dataLayer
+
+✅ Now every form submission tracks:
+	•	Which campaign drove it
+	•	Source/medium
+	•	Form name
+
+⸻
+
+5️⃣ Summary in Plain English
+	1.	Page Load: Capture UTMs → store in cookies → persists across site
+	2.	GA4PageTracker: Tracks pageviews with SPA support
+	3.	MarketingTrigger: Fires heavy marketing pixels later
+	4.	Form Submit: Reads cookies → sends event with UTMs to GTM / GA4
+
+This guarantees:
+	•	Paid campaign attribution is preserved
+	•	You don’t lose short sessions
+	•	CWV stays high (no extra JS blocking)
+	•	Forms are linked to campaigns automatically
+
+
+
+"use client";
+import { useEffect } from "react";
+
+export default function MarketingTrigger() {
+  useEffect(() => {
+    const fireMarketing = () => {
+      // Ensure this only fires once
+      if (window.marketingFired) return;
+      window.marketingFired = true;
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "marketing_ready" });
+
+      // 🔹 Load guarded scripts here directly if needed
+      loadTikTokPixel();
+      loadRulerScript();
+      loadMetaPixel();
+      loadLinkedInPixel();
+      // Add other heavy scripts similarly
+    };
+
+    // Fire after 4s or on user interaction
+    const timer = setTimeout(fireMarketing, 4000);
+    window.addEventListener("click", fireMarketing, { once: true });
+    window.addEventListener("scroll", fireMarketing, { once: true });
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return null;
+}
+
+/* --------- Guarded Scripts --------- */
+
+function loadTikTokPixel() {
+  if (!window.ttq) {
+    !(function (w, d, t) {
+      w.TiktokAnalyticsObject = t;
+      var ttq = (w[t] = w[t] || []);
+      ttq.methods = ["page", "track", "identify", "instances", "debug"];
+      ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } };
+      for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+      ttq.instance = function (t) { for (var e = 0; e < ttq.methods.length; e++) ttq.setAndDefer(ttq, ttq.methods[e]); return ttq };
+      ttq.load = function (e) { 
+        var o = d.createElement("script"); 
+        o.async = !0; 
+        o.src = "https://analytics.tiktok.com/i18n/pixel/events.js"; 
+        d.head.appendChild(o); 
+      };
+      ttq.load("YOUR_TIKTOK_PIXEL_ID");
+      ttq.page();
+    })(window, document, "ttq");
+  }
+}
+
+function loadRulerScript() {
+  if (!window.rulerScriptLoaded) {
+    window.rulerScriptLoaded = true;
+    (function(d, s, id){
+      var js, rjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id; js.async = true;
+      js.src = "https://cdn.ruleranalytics.com/ruler.min.js";
+      rjs.parentNode.insertBefore(js, rjs);
+    })(document, "script", "ruler-js");
+  }
+}
+
+function loadMetaPixel() {
+  if (!window.fbq) {
+    !(function(f,b,e,v,n,t,s){
+      if(f.fbq) return;
+      n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq) f._fbq=n;
+      n.push=n; n.loaded=!0; n.version='2.0'; n.queue=[];
+      t=b.createElement(e); t.async=!0; t.src=v;
+      s=b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);
+    })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID');
+    fbq('track', 'PageView');
+  }
+}
+
+function loadLinkedInPixel() {
+  if (!window._linkedin_data_partner_ids) {
+    window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+    window._linkedin_data_partner_ids.push("YOUR_PARTNER_ID");
+    (function(l) {
+      if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};window.lintrk.q=[]}
+      var s = document.getElementsByTagName("script")[0];
+      var b = document.createElement("script");
+      b.type = "text/javascript"; b.async = true;
+      b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+      s.parentNode.insertBefore(b, s);
+    })(window.lintrk);
+  }
+}
