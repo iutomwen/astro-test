@@ -1,0 +1,440 @@
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+} from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+
+//
+// USERS
+//
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(), // uuid
+  email: text("email"),
+  canNumber: text("can_number"),
+  userType: text("user_type"),
+  firstLogin: integer("first_login", { mode: "timestamp" }),
+  lastLogin: integer("last_login", { mode: "timestamp" }),
+  firstPage: text("first_page"),
+  locale: text("locale"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .default(sql`(strftime('%s','now'))`)
+}, (t) => ({
+  emailIdx: index("users_email_idx").on(t.email),
+  canIdx: index("users_can_idx").on(t.canNumber),
+}));
+
+//
+// SESSIONS
+//
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  startedAt: integer("started_at", { mode: "timestamp" })
+    .default(sql`(strftime('%s','now'))`),
+  lastActivity: integer("last_activity", { mode: "timestamp" }),
+  userAgent: text("user_agent"),
+}, (t) => ({
+  userIdx: index("sessions_user_idx").on(t.userId),
+  dateIdx: index("sessions_date_idx").on(t.startedAt),
+}));
+
+//
+// EVENTS
+//
+export const events = sqliteTable("events", {
+  id: text("id").primaryKey(),
+  userId: text("user_id"),
+  sessionId: text("session_id"),
+  type: text("type").notNull(), // page_view | video_view | login
+  meta: text("meta"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .default(sql`(strftime('%s','now'))`)
+}, (t) => ({
+  typeIdx: index("events_type_idx").on(t.type),
+  userIdx: index("events_user_idx").on(t.userId),
+  dateIdx: index("events_date_idx").on(t.createdAt),
+}));
+
+
+
+
+
+import { nanoid } from "nanoid";
+import { sessions } from "@/db/schema";
+import { getDB } from "@/db";
+
+export async function POST(req: Request, { env }: any) {
+  const db = getDB(env);
+  const body = await req.json();
+
+  const sessionId = nanoid();
+  const now = Math.floor(Date.now() / 1000);
+
+  await db.insert(sessions).values({
+    id: sessionId,
+    userId: body.userId,
+    lastActivity: now,
+    userAgent: body.userAgent,
+  });
+
+  return Response.json({ sessionId });
+}
+
+
+import { nanoid } from "nanoid";
+import { events, sessions } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { getDB } from "@/db";
+
+export async function POST(req: Request, { env }: any) {
+  const db = getDB(env);
+  const { userId, sessionId, type, meta } = await req.json();
+
+  const now = Math.floor(Date.now() / 1000);
+
+  await db.insert(events).values({
+    id: nanoid(),
+    userId,
+    sessionId,
+    type,
+    meta: JSON.stringify(meta),
+    createdAt: now
+  });
+
+  await db.update(sessions)
+    .set({ lastActivity: now })
+    .where(eq(sessions.id, sessionId));
+
+  return Response.json({ success: true });
+}
+
+
+
+import { sql } from "drizzle-orm";
+import { getDB } from "@/db";
+
+export async function GET(req: Request, { env }: any) {
+  const db = getDB(env);
+
+  const result = await db.all(sql`
+    SELECT 
+      strftime('%Y-%m-%d', datetime(started_at, 'unixepoch')) as day,
+      COUNT(DISTINCT user_id) as uniqueUsers
+    FROM sessions
+    GROUP BY day
+    ORDER BY day DESC
+  `);
+
+  return Response.json(result);
+}
+
+
+
+import { sql } from "drizzle-orm";
+import { getDB } from "@/db";
+
+export async function GET(req: Request, { env }: any) {
+  const db = getDB(env);
+
+  const result = await db.all(sql`
+    SELECT 
+      cohort,
+      activity_month,
+      COUNT(DISTINCT user_id) as activeUsers
+    FROM (
+      SELECT 
+        u.id as user_id,
+        strftime('%Y-%m', datetime(u.created_at, 'unixepoch')) as cohort,
+        strftime('%Y-%m', datetime(s.started_at, 'unixepoch')) as activity_month
+      FROM users u
+      JOIN sessions s ON s.user_id = u.id
+    )
+    GROUP BY cohort, activity_month
+    ORDER BY cohort, activity_month
+  `);
+
+  return Response.json(result);
+}
+
+
+
+
+import React, { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+type UniqueData = {
+  day: string;
+  uniqueUsers: number;
+};
+
+export default function Dashboard() {
+  const [unique, setUnique] = useState<UniqueData[]>([]);
+  const [retention, setRetention] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("https://your-api.com/api/analytics/unique")
+      .then(res => res.json())
+      .then(setUnique);
+
+    fetch("https://your-api.com/api/analytics/retention")
+      .then(res => res.json())
+      .then(setRetention);
+  }, []);
+
+  return (
+    <div style={{ padding: 40 }}>
+      <h1>Analytics Dashboard</h1>
+
+      <h2>Daily Unique Users</h2>
+      <div style={{ width: "100%", height: 300 }}>
+        <ResponsiveContainer>
+          <LineChart data={unique}>
+            <XAxis dataKey="day" />
+            <YAxis />
+            <Tooltip />
+            <Line dataKey="uniqueUsers" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <h2 style={{ marginTop: 40 }}>Retention Cohorts</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Cohort</th>
+            <th>Month</th>
+            <th>Active Users</th>
+          </tr>
+        </thead>
+        <tbody>
+          {retention.map((r, i) => (
+            <tr key={i}>
+              <td>{r.cohort}</td>
+              <td>{r.activity_month}</td>
+              <td>{r.activeUsers}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
+CREATE INDEX idx_sessions_user_date 
+ON sessions(user_id, started_at);
+
+CREATE INDEX idx_events_type_date 
+ON events(type, created_at);
+
+
+export const dailyStats = sqliteTable("daily_stats", {
+  date: text("date").primaryKey(),
+  pageViews: integer("page_views"),
+  uniqueUsers: integer("unique_users"),
+  videosWatched: integer("videos_watched"),
+});
+
+
+
+import { eq, or } from "drizzle-orm";
+import { users, sessions } from "@/db/schema";
+import { getDB } from "@/db";
+import { nanoid } from "nanoid";
+
+export async function POST(req: Request, { env }: any) {
+  const db = getDB(env);
+  const { email, canNumber, userAgent } = await req.json();
+
+  if (!email && !canNumber) {
+    return Response.json({ error: "Missing credentials" }, { status: 400 });
+  }
+
+  // Find user
+  const user = await db.query.users.findFirst({
+    where: or(
+      email ? eq(users.email, email) : undefined,
+      canNumber ? eq(users.canNumber, canNumber) : undefined
+    ),
+  });
+
+  if (!user) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const sessionId = nanoid();
+
+  // Create session
+  await db.insert(sessions).values({
+    id: sessionId,
+    userId: user.id,
+    lastActivity: now,
+    userAgent,
+  });
+
+  return Response.json({
+    sessionId,
+    userId: user.id,
+  });
+}
+
+auth.ts
+import Cookies from "js-cookie";
+
+const API_URL = "https://your-api-domain.com";
+
+export async function loginUser({
+  email,
+  canNumber,
+}: {
+  email?: string;
+  canNumber?: string;
+}) {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email,
+      canNumber,
+      userAgent: navigator.userAgent,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  // Store session for 30 days
+  Cookies.set("sessionId", data.sessionId, { expires: 30 });
+  Cookies.set("userId", data.userId, { expires: 30 });
+
+  return data;
+}
+
+loginform.tsx
+
+import React, { useState } from "react";
+import { loginUser } from "../utils/auth";
+
+export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [canNumber, setCanNumber] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    try {
+      await loginUser({ email, canNumber });
+      alert("Login successful");
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        placeholder="CAN Number"
+        value={canNumber}
+        onChange={(e) => setCanNumber(e.target.value)}
+      />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+import { nanoid } from "nanoid";
+import { events, sessions } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { getDB } from "@/db";
+
+export async function POST(req: Request, { env }: any) {
+  const db = getDB(env);
+  const { userId, sessionId, type, meta } = await req.json();
+
+  const now = Math.floor(Date.now() / 1000);
+
+  await db.insert(events).values({
+    id: nanoid(),
+    userId,
+    sessionId,
+    type,
+    meta: JSON.stringify(meta),
+    createdAt: now,
+  });
+
+  await db.update(sessions)
+    .set({ lastActivity: now })
+    .where(eq(sessions.id, sessionId));
+
+  return Response.json({ success: true });
+}
+
+gatsby tracker 
+
+import Cookies from "js-cookie";
+
+const API_URL = "https://your-api-domain.com";
+
+export async function trackEvent(
+  type: string,
+  meta: Record<string, any> = {}
+) {
+  const sessionId = Cookies.get("sessionId");
+  const userId = Cookies.get("userId");
+
+  if (!sessionId || !userId) return;
+
+  await fetch(`${API_URL}/api/events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId,
+      sessionId,
+      type,
+      meta,
+    }),
+  });
+}
+
+gatsby-browser.js
+
+import { trackEvent } from "./src/utils/tracker";
+
+export const onRouteUpdate = ({ location }) => {
+  trackEvent("page_view", {
+    path: location.pathname,
+  });
+};
+
+video view
+import { trackEvent } from "../utils/tracker";
+
+function handleVideoComplete(videoId: string) {
+  trackEvent("video_view", {
+    videoId,
+    completed: true,
+  });
+}
+
+navigator.sendBeacon(
+  `${API_URL}/api/events`,
+  JSON.stringify({ userId, sessionId, type, meta })
+);
