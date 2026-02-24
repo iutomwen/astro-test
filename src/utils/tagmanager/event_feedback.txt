@@ -1,0 +1,391 @@
+schema
+
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
+
+/**
+ * EVENT
+ */
+export const event = sqliteTable("event", {
+  id: text("id").primaryKey(), // uuid
+  name: text("name").notNull(),
+  date: integer("date", { mode: "timestamp" }).notNull(),
+  location: text("location"),
+});
+
+/**
+ * EVENT_USER (one per user per event)
+ */
+export const eventUser = sqliteTable("event_user", {
+  id: text("id").primaryKey(), // uuid
+  eventId: text("event_id")
+    .notNull()
+    .references(() => event.id),
+  userId: text("user_id").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+/**
+ * APPOINTMENT
+ */
+export const appointment = sqliteTable("appointment", {
+  id: text("id").primaryKey(),
+  eventUserId: text("event_user_id")
+    .notNull()
+    .references(() => eventUser.id),
+  bookedAt: integer("booked_at", { mode: "timestamp" }).notNull(),
+});
+
+/**
+ * EVENT FEEDBACK (NEW)
+ */
+export const eventFeedback = sqliteTable("event_feedback", {
+  id: text("id").primaryKey(), // uuid
+
+  eventUserId: text("event_user_id")
+    .notNull()
+    .unique() // one feedback per attendance
+    .references(() => eventUser.id),
+
+  overallRating: integer("overall_rating").notNull(), // 1–5
+  speakerRating: integer("speaker_rating").notNull(),
+  venueRating: integer("venue_rating").notNull(),
+  organisationRating: integer("organisation_rating").notNull(),
+
+  comments: text("comments"),
+
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+
+export const eventFeedback = sqliteTable("event_feedback", {
+  id: text("id").primaryKey(),
+  eventUserId: text("event_user_id")
+    .notNull()
+    .unique()
+    .references(() => eventUser.id),
+
+  npsScore: integer("nps_score").notNull(),
+
+  overallRating: integer("overall_rating").notNull(),
+  speakerRating: integer("speaker_rating").notNull(),
+  venueRating: integer("venue_rating").notNull(),
+  organisationRating: integer("organisation_rating").notNull(),
+
+  comments: text("comments"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+relationship 
+
+export const eventUserRelations = relations(eventUser, ({ one, many }) => ({
+  event: one(event, {
+    fields: [eventUser.eventId],
+    references: [event.id],
+  }),
+  feedback: one(eventFeedback),
+  appointments: many(appointment),
+}));
+
+export const eventFeedbackRelations = relations(eventFeedback, ({ one }) => ({
+  eventUser: one(eventUser, {
+    fields: [eventFeedback.eventUserId],
+    references: [eventUser.id],
+  }),
+}));
+
+
+api/feedback
+
+import { NextRequest, NextResponse } from "next/server";
+import { drizzle } from "drizzle-orm/d1";
+import { eventFeedback } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { v4 as uuid } from "uuid";
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+
+  const {
+    eventUserId,
+    overallRating,
+    speakerRating,
+    venueRating,
+    organisationRating,
+    comments,
+  } = body;
+
+  if (!eventUserId) {
+    return NextResponse.json({ error: "Missing eventUserId" }, { status: 400 });
+  }
+
+  const db = drizzle(process.env.DB as any);
+
+  // Prevent duplicate feedback
+  const existing = await db
+    .select()
+    .from(eventFeedback)
+    .where(eq(eventFeedback.eventUserId, eventUserId))
+    .get();
+
+  if (existing) {
+    return NextResponse.json(
+      { error: "Feedback already submitted" },
+      { status: 400 }
+    );
+  }
+
+  await db.insert(eventFeedback).values({
+    id: uuid(),
+    eventUserId,
+    overallRating,
+    speakerRating,
+    venueRating,
+    organisationRating,
+    comments,
+    createdAt: new Date(),
+  });
+
+  return NextResponse.json({ success: true });
+}
+
+feebldback ui
+
+"use client";
+
+import { useState } from "react";
+
+export default function FeedbackPage({
+  params,
+}: {
+  params: { eventUserId: string };
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    overallRating: 5,
+    speakerRating: 5,
+    venueRating: 5,
+    organisationRating: 5,
+    comments: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    await fetch("/api/feedback", {
+      method: "POST",
+      body: JSON.stringify({
+        ...form,
+        eventUserId: params.eventUserId,
+      }),
+    });
+
+    setLoading(false);
+    alert("Thank you for your feedback!");
+  };
+
+  const RatingSelect = ({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string;
+    value: number;
+    onChange: (v: number) => void;
+  }) => (
+    <div className="space-y-2">
+      <label className="font-medium">{label}</label>
+      <select
+        className="w-full border rounded p-2"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      >
+        {[1, 2, 3, 4, 5].map((n) => (
+          <option key={n} value={n}>
+            {n} ⭐
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  return (
+    <div className="max-w-xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Event Feedback</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <RatingSelect
+          label="Overall Experience"
+          value={form.overallRating}
+          onChange={(v) => setForm({ ...form, overallRating: v })}
+        />
+
+        <RatingSelect
+          label="Speaker"
+          value={form.speakerRating}
+          onChange={(v) => setForm({ ...form, speakerRating: v })}
+        />
+
+        <RatingSelect
+          label="Venue"
+          value={form.venueRating}
+          onChange={(v) => setForm({ ...form, venueRating: v })}
+        />
+
+        <RatingSelect
+          label="Organisation"
+          value={form.organisationRating}
+          onChange={(v) => setForm({ ...form, organisationRating: v })}
+        />
+
+        <div>
+          <label className="font-medium">Additional Comments</label>
+          <textarea
+            className="w-full border rounded p-2 mt-2"
+            rows={4}
+            value={form.comments}
+            onChange={(e) =>
+              setForm({ ...form, comments: e.target.value })
+            }
+          />
+        </div>
+
+        <button
+          disabled={loading}
+          className="w-full bg-black text-white py-2 rounded"
+        >
+          {loading ? "Submitting..." : "Submit Feedback"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+average rating per event 
+
+await db
+  .select({
+    avgOverall: sql<number>`avg(${eventFeedback.overallRating})`,
+  })
+  .from(eventFeedback)
+  .innerJoin(eventUser, eq(eventUser.id, eventFeedback.eventUserId))
+  .where(eq(eventUser.eventId, eventId));
+
+utils 
+
+function classifyNPS(score: number) {
+  if (score >= 9) return "promoter";
+  if (score >= 7) return "passive";
+  return "detractor";
+}
+
+nps calculator
+import { sql } from "drizzle-orm";
+
+const results = await db
+  .select({
+    promoters: sql<number>`sum(case when ${eventFeedback.npsScore} >= 9 then 1 else 0 end)`,
+    passives: sql<number>`sum(case when ${eventFeedback.npsScore} between 7 and 8 then 1 else 0 end)`,
+    detractors: sql<number>`sum(case when ${eventFeedback.npsScore} <= 6 then 1 else 0 end)`,
+    total: sql<number>`count(*)`,
+  })
+  .from(eventFeedback)
+  .innerJoin(eventUser, eq(eventUser.id, eventFeedback.eventUserId))
+  .where(eq(eventUser.eventId, eventId))
+  .get();
+
+const nps =
+  ((results.promoters - results.detractors) / results.total) * 100;
+
+prevent feedback if not attented
+const attendance = await db
+  .select()
+  .from(eventUser)
+  .where(eq(eventUser.id, eventUserId))
+  .get();
+
+if (!attendance) {
+  return NextResponse.json(
+    { error: "Invalid attendance record" },
+    { status: 403 }
+  );
+}
+
+dynamic feedback
+export const eventFeedbackForm = sqliteTable("event_feedback_form", {
+  id: text("id").primaryKey(),
+  eventId: text("event_id")
+    .notNull()
+    .unique() // one form per event
+    .references(() => event.id),
+
+  title: text("title").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const eventFeedbackQuestion = sqliteTable("event_feedback_question", {
+  id: text("id").primaryKey(),
+
+  formId: text("form_id")
+    .notNull()
+    .references(() => eventFeedbackForm.id),
+
+  label: text("label").notNull(),
+
+  type: text("type").notNull(), 
+  // "rating_1_5"
+  // "nps_0_10"
+  // "text"
+  // "select"
+
+  required: integer("required", { mode: "boolean" }).notNull(),
+
+  order: integer("order").notNull(),
+});
+
+export const eventFeedbackSubmission = sqliteTable(
+  "event_feedback_submission",
+  {
+    id: text("id").primaryKey(),
+
+    eventUserId: text("event_user_id")
+      .notNull()
+      .unique() // only 1 submission per attendance
+      .references(() => eventUser.id),
+
+    formId: text("form_id")
+      .notNull()
+      .references(() => eventFeedbackForm.id),
+
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  }
+);
+
+export const eventFeedbackAnswer = sqliteTable("event_feedback_answer", {
+  id: text("id").primaryKey(),
+
+  submissionId: text("submission_id")
+    .notNull()
+    .references(() => eventFeedbackSubmission.id),
+
+  questionId: text("question_id")
+    .notNull()
+    .references(() => eventFeedbackQuestion.id),
+
+  value: text("value").notNull(), // store as string
+});
+
+get feedback 
+const form = await db
+  .select()
+  .from(eventFeedbackForm)
+  .where(eq(eventFeedbackForm.eventId, eventId))
+  .get();
+
+const questions = await db
+  .select()
+  .from(eventFeedbackQuestion)
+  .where(eq(eventFeedbackQuestion.formId, form.id))
+  .orderBy(eventFeedbackQuestion.order);
