@@ -1,0 +1,211 @@
+<header class="border-b bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <div class="font-bold text-lg">
+        Logo
+      </div>
+
+      <!-- Mobile toggle -->
+      <input id="menu-toggle" type="checkbox" class="hidden peer">
+
+      <label for="menu-toggle" class="md:hidden cursor-pointer">
+        ☰
+      </label>
+
+      <!-- Desktop Menu -->
+      <nav class="hidden md:flex gap-8 items-center">
+
+        <!-- Mega menu trigger -->
+        <div class="relative group">
+
+          <button class="font-medium">
+            Products
+          </button>
+
+          <!-- Mega Menu -->
+          <div class="absolute left-1/2 top-full -translate-x-1/2 mt-6 
+          opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+          group-focus-within:opacity-100 group-focus-within:visible
+          transition-all duration-200">
+
+            <div class="w-[750px] bg-white shadow-xl border rounded-xl p-8">
+
+              <div class="grid grid-cols-3 gap-8">
+
+                <!-- Column -->
+                <div>
+                  <h3 class="font-semibold mb-3">Platform</h3>
+                  <ul class="space-y-2 text-sm">
+                    <li><a class="hover:text-blue-600">Analytics</a></li>
+                    <li><a class="hover:text-blue-600">Automation</a></li>
+                    <li><a class="hover:text-blue-600">Workflows</a></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 class="font-semibold mb-3">Developers</h3>
+                  <ul class="space-y-2 text-sm">
+                    <li><a class="hover:text-blue-600">API</a></li>
+                    <li><a class="hover:text-blue-600">SDK</a></li>
+                    <li><a class="hover:text-blue-600">Integrations</a></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 class="font-semibold mb-3">Resources</h3>
+                  <ul class="space-y-2 text-sm">
+                    <li><a class="hover:text-blue-600">Docs</a></li>
+                    <li><a class="hover:text-blue-600">Guides</a></li>
+                    <li><a class="hover:text-blue-600">Community</a></li>
+                  </ul>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <a class="font-medium hover:text-blue-600">Pricing</a>
+        <a class="font-medium hover:text-blue-600">Docs</a>
+
+      </nav>
+
+    </div>
+
+  </div>
+
+  <!-- Mobile drawer -->
+  <div class="fixed inset-0 bg-black/40 opacity-0 pointer-events-none
+  peer-checked:opacity-100 peer-checked:pointer-events-auto transition md:hidden"></div>
+
+  <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-xl
+  transform -translate-x-full peer-checked:translate-x-0
+  transition-transform duration-300 md:hidden">
+
+    <div class="p-6 space-y-4">
+
+      <a class="block font-medium">Home</a>
+
+      <!-- Mobile accordion -->
+      <details class="border-b pb-2">
+        <summary class="cursor-pointer font-medium">
+          Products
+        </summary>
+
+        <div class="pl-4 mt-2 space-y-2 text-sm">
+          <a class="block">Analytics</a>
+          <a class="block">Automation</a>
+          <a class="block">Workflows</a>
+        </div>
+      </details>
+
+      <a class="block font-medium">Pricing</a>
+      <a class="block font-medium">Docs</a>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+
+type DrawerProps = {
+  id: string
+  children: React.ReactNode
+}
+
+export default function Drawer({ id, children }: DrawerProps) {
+  return (
+    <>
+      <input id={id} type="checkbox" className="hidden peer" />
+
+      {/* overlay */}
+      <label
+        htmlFor={id}
+        className="
+        fixed inset-0 bg-black/40 opacity-0 pointer-events-none
+        peer-checked:opacity-100 peer-checked:pointer-events-auto
+        transition-opacity duration-300
+      "
+      />
+
+      {/* drawer */}
+      <div
+        className="
+        fixed top-0 left-0 h-full w-[320px] bg-white shadow-xl
+        transform -translate-x-full
+        peer-checked:translate-x-0
+        transition-transform duration-300
+        z-50
+      "
+      >
+        {children}
+      </div>
+    </>
+  )
+}
+
+
+<label
+  htmlFor="mobile-drawer"
+  className="cursor-pointer px-4 py-2 border rounded"
+>
+  Open drawer
+</label>
+
+
+<Drawer id="mobile-drawer">
+
+  <div className="p-6 space-y-4">
+
+    <h2 className="font-semibold text-lg">Menu</h2>
+
+    <nav className="space-y-3">
+      <a className="block">Home</a>
+      <a className="block">Products</a>
+      <a className="block">Pricing</a>
+      <a className="block">Docs</a>
+    </nav>
+
+  </div>
+
+</Drawer>
+
+
+<Drawer id="contact-drawer">
+
+  <div className="p-6">
+
+    <h2 className="font-semibold mb-4">
+      Contact us
+    </h2>
+
+    <form className="space-y-3">
+
+      <input
+        className="w-full border p-2 rounded"
+        placeholder="Name"
+      />
+
+      <input
+        className="w-full border p-2 rounded"
+        placeholder="Email"
+      />
+
+      <button className="w-full bg-black text-white p-2 rounded">
+        Submit
+      </button>
+
+    </form>
+
+  </div>
+
+</Drawer>
