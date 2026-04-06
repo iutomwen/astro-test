@@ -1,0 +1,94 @@
+---
+import Drawer from "../ui/Drawer.astro";
+import Dropdown from "../ui/Dropdown.astro";
+import Button from "../ui/Button.astro";
+---
+
+<header class="border-b h-[64px] flex items-center px-4 justify-between">
+
+  <div class="font-bold">Logo</div>
+
+  <!-- MOBILE -->
+  <button class="md:hidden" onclick="mobileMenu.open()">☰</button>
+
+  <!-- DESKTOP NAV -->
+  <nav class="hidden md:flex gap-6 items-center">
+
+    <!-- DROPDOWN (replaces simple mega trigger) -->
+    <Dropdown id="productsDropdown">
+      <span slot="trigger" class="font-medium cursor-pointer">
+        Products
+      </span>
+
+      <div class="grid gap-2">
+        <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded">
+          Item 1
+        </a>
+        <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded">
+          Item 2
+        </a>
+        <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded">
+          Item 3
+        </a>
+      </div>
+    </Dropdown>
+
+    <!-- You can still keep mega menu if needed -->
+    <div class="relative group">
+      <button class="font-medium">Solutions</button>
+
+      <div class="absolute left-0 top-full hidden 
+                  group-hover:grid group-focus-within:grid
+                  grid-cols-3 gap-6 bg-white shadow-lg p-6 w-[600px]">
+        <div>
+          <h3 class="font-bold">Category</h3>
+          <a href="#">Item A</a>
+        </div>
+        <div>
+          <h3 class="font-bold">Category</h3>
+          <a href="#">Item B</a>
+        </div>
+      </div>
+    </div>
+
+    <Button onclick="extraPanel.open()">More</Button>
+  </nav>
+</header>
+
+<!-- MOBILE DRAWER -->
+<Drawer id="mobileMenu">
+  <span slot="title">Menu</span>
+
+  <nav class="flex flex-col gap-4">
+
+    <!-- SAME CONTENT, MOBILE VERSION -->
+    <details>
+      <summary class="cursor-pointer font-medium">Products</summary>
+      <div class="ml-4 mt-2 flex flex-col gap-2">
+        <a href="#">Item 1</a>
+        <a href="#">Item 2</a>
+        <a href="#">Item 3</a>
+      </div>
+    </details>
+
+    <details>
+      <summary class="cursor-pointer font-medium">Solutions</summary>
+      <div class="ml-4 mt-2 flex flex-col gap-2">
+        <a href="#">Item A</a>
+        <a href="#">Item B</a>
+      </div>
+    </details>
+
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</Drawer>
+
+<!-- GLOBAL DRAWER -->
+<Drawer id="extraPanel" side="right" width="w-[400px]">
+  <span slot="title">Extra Panel</span>
+
+  <div class="space-y-4">
+    <p>Reusable drawer content</p>
+  </div>
+</Drawer>
