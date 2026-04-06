@@ -1,0 +1,34 @@
+---
+const { id, side = "left", width = "w-80" } = Astro.props;
+---
+
+<div id={id} class="fixed inset-0 z-50 hidden">
+  <!-- Overlay -->
+  <div data-overlay class="absolute inset-0 bg-black/50 opacity-0"></div>
+
+  <!-- Panel -->
+  <div
+    data-panel
+    data-side={side}
+    class={`absolute top-0 ${side}-0 h-full ${width} bg-white shadow-lg`}
+    style={`transform: translateX(${side === "left" ? "-100%" : "100%"})`}
+  >
+    <div class="flex justify-between items-center p-4 border-b">
+      <slot name="title" />
+      <button data-close>✕</button>
+    </div>
+
+    <div class="p-4 overflow-y-auto">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { registerDrawer } from "/src/scripts/drawer.js";
+
+  const el = document.getElementById("{id}");
+  const api = registerDrawer("{id}", el);
+
+  window["{id}"] = api;
+</script>
