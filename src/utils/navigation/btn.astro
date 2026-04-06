@@ -1,0 +1,7 @@
+---
+const { variant = "primary", class: className = "" } = Astro.props;
+---
+
+<button class={`btn btn-${variant} ${className}`}>
+  <slot />
+</button>
