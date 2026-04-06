@@ -1,0 +1,45 @@
+---
+const { id } = Astro.props;
+---
+
+<div class="relative" id={id}>
+  <button data-trigger aria-expanded="false">
+    <slot name="trigger" />
+  </button>
+
+  <div
+    data-menu
+    class="hidden absolute left-0 mt-2 min-w-[200px] bg-white shadow rounded p-2 z-50"
+  >
+    <slot />
+  </div>
+</div>
+
+<script>
+  const root = document.getElementById("{id}");
+  const btn = root.querySelector("[data-trigger]");
+  const menu = root.querySelector("[data-menu"]);
+
+  function close() {
+    menu.classList.add("hidden");
+    btn.setAttribute("aria-expanded", "false");
+  }
+
+  function open() {
+    menu.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+  }
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.contains("hidden") ? open() : close();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!root.contains(e.target)) close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+</script>
