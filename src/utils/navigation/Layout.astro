@@ -132,3 +132,218 @@ window.dataLayer.push({
   event: "form_success",
   form_name: "contact_form"
 });
+
+
+
+version 2
+
+---
+const { title = "My Site" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+
+    <!-- ✅ Preconnects (performance boost) -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+    <link rel="preconnect" href="https://cdn.cookielaw.org" />
+    <link rel="dns-prefetch" href="https://cdn.cookielaw.org" />
+
+    <!-- ✅ Lightweight dataLayer (instant, no cost) -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "page_view",
+        page_path: location.pathname,
+        page_title: document.title
+      });
+    </script>
+
+    <!-- ✅ UTM Capture (30 days persistence) -->
+    <script is:inline>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const utms = [
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_term",
+          "utm_content"
+        ];
+
+        utms.forEach((key) => {
+          const value = params.get(key);
+          if (value) {
+            document.cookie = `${key}=${value}; path=/; max-age=${60 * 60 * 24 * 30}`;
+          }
+        });
+      })();
+    </script>
+
+    <!-- ✅ GTM Loader (controlled, consent-aware) -->
+    <script is:inline>
+      window.loadGTM = function () {
+        if (window.__gtmLoaded) return;
+        window.__gtmLoaded = true;
+
+        const s = document.createElement("script");
+        s.src = "https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"; // 🔁 replace
+        s.async = true;
+        document.head.appendChild(s);
+      };
+    </script>
+
+    <!-- ✅ OneTrust Callback (controls GTM based on consent) -->
+    <script is:inline>
+      function OptanonWrapper() {
+        const consent = window.OnetrustActiveGroups || "";
+
+        // 🔁 Adjust based on your OneTrust categories
+        const hasAnalytics = consent.includes("C0002");
+        const hasMarketing = consent.includes("C0004");
+
+        if (hasAnalytics || hasMarketing) {
+          window.loadGTM && window.loadGTM();
+        }
+      }
+    </script>
+
+    <!-- ✅ Lazy Load OneTrust (CWV optimized) -->
+    <script is:inline>
+      (function () {
+        let loaded = false;
+
+        function loadOneTrust() {
+          if (loaded) return;
+          loaded = true;
+
+          const s = document.createElement("script");
+          s.src = "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js";
+          s.setAttribute("data-domain-script", "YOUR-ONETRUST-ID"); // 🔁 replace
+          s.async = true;
+
+          document.head.appendChild(s);
+        }
+
+        // 🚀 Load on interaction
+        ["scroll", "click", "touchstart"].forEach((event) => {
+          window.addEventListener(event, loadOneTrust, {
+            once: true,
+            passive: true
+          });
+        });
+
+        // 💤 Fallback (ensures banner still appears)
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(loadOneTrust, { timeout: 3000 });
+        } else {
+          setTimeout(loadOneTrust, 3000);
+        }
+      })();
+    </script>
+
+    <!-- ✅ Prevent CLS from banner -->
+    <style>
+      #onetrust-banner-sdk {
+        min-height: 60px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <slot />
+
+    <!-- ✅ Global Tracking Helper -->
+    <script is:inline>
+      (function () {
+        function track(event, data = {}) {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event,
+            ...data,
+            timestamp: Date.now()
+          });
+        }
+
+        // 🔘 Click tracking
+        document.addEventListener("click", (e) => {
+          const el = e.target.closest("[data-track]");
+          if (!el) return;
+
+          track("click", {
+            component: el.dataset.track,
+            text: el.innerText?.trim()
+          });
+        });
+
+        // 📝 Form tracking
+        document.addEventListener("submit", (e) => {
+          const form = e.target;
+
+          track("form_submit", {
+            form_name: form.dataset.name || form.name || "unknown"
+          });
+        });
+
+        // 🌐 Expose globally
+        window.analytics = { track };
+
+        // ⚡ Astro SPA navigation support
+        document.addEventListener("astro:page-load", () => {
+          track("page_view", {
+            page_path: location.pathname
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+
+extras 
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+    window.dataLayer.push(arguments);
+  }
+
+  // ✅ DEFAULT: deny everything (GDPR safe)
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    analytics_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500
+  });
+</script>
+
+optwrapper
+
+<script is:inline>
+  function OptanonWrapper() {
+    const consent = window.OnetrustActiveGroups || "";
+
+    const hasAnalytics = consent.includes("C0002");
+    const hasMarketing = consent.includes("C0004");
+
+    // ✅ Update Google Consent Mode
+    gtag('consent', 'update', {
+      analytics_storage: hasAnalytics ? 'granted' : 'denied',
+      ad_storage: hasMarketing ? 'granted' : 'denied',
+      ad_user_data: hasMarketing ? 'granted' : 'denied',
+      ad_personalization: hasMarketing ? 'granted' : 'denied'
+    });
+
+    // ✅ Load GTM only after consent
+    if (hasAnalytics || hasMarketing) {
+      window.loadGTM && window.loadGTM();
+    }
+  }
+</script>
