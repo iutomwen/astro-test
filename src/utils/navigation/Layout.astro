@@ -1,0 +1,134 @@
+---
+const { title = "My Site" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+
+    <!-- ✅ Preconnect (cheap performance win) -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+    <!-- ✅ Lightweight dataLayer (runs immediately, near-zero cost) -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "page_view",
+        page_path: location.pathname,
+        page_title: document.title
+      });
+    </script>
+
+    <!-- ✅ UTM Capture (persist for attribution) -->
+    <script is:inline>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const utms = [
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_term",
+          "utm_content"
+        ];
+
+        utms.forEach((key) => {
+          const value = params.get(key);
+          if (value) {
+            document.cookie = `${key}=${value}; path=/; max-age=${60 * 60 * 24 * 30}`;
+          }
+        });
+      })();
+    </script>
+
+    <!-- ✅ Lazy-load GTM (CORE CWV OPTIMIZATION) -->
+    <script is:inline>
+      (function () {
+        let loaded = false;
+
+        function loadGTM() {
+          if (loaded) return;
+          loaded = true;
+
+          const s = document.createElement("script");
+          s.src = "https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"; // 🔁 replace
+          s.async = true;
+          document.head.appendChild(s);
+        }
+
+        // 🚀 Load on first interaction
+        ["scroll", "click", "touchstart"].forEach((event) => {
+          window.addEventListener(event, loadGTM, {
+            once: true,
+            passive: true
+          });
+        });
+
+        // 💤 Fallback: load after idle
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(loadGTM, { timeout: 5000 });
+        } else {
+          setTimeout(loadGTM, 5000);
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <slot />
+
+    <!-- ✅ Global Tracking Helper (for GTM + your analytics) -->
+    <script is:inline>
+      (function () {
+        function track(event, data = {}) {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event,
+            ...data,
+            timestamp: Date.now()
+          });
+        }
+
+        // 🔘 Click tracking
+        document.addEventListener("click", (e) => {
+          const el = e.target.closest("[data-track]");
+          if (!el) return;
+
+          track("click", {
+            component: el.dataset.track,
+            text: el.innerText?.trim()
+          });
+        });
+
+        // 📝 Form tracking
+        document.addEventListener("submit", (e) => {
+          const form = e.target;
+
+          track("form_submit", {
+            form_name: form.dataset.name || form.name || "unknown"
+          });
+        });
+
+        // 🌐 Expose globally
+        window.analytics = { track };
+
+        // ⚡ Astro SPA navigation support
+        document.addEventListener("astro:page-load", () => {
+          track("page_view", {
+            page_path: location.pathname
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+
+form tracker 
+window.dataLayer.push({
+  event: "form_success",
+  form_name: "contact_form"
+});
