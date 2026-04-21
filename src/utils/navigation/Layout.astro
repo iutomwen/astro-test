@@ -347,3 +347,43 @@ optwrapper
     }
   }
 </script>
+
+
+
+
+
+
+<script>
+
+// formHandler.js - Add this script to your Astro layout or component
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isMobile = () => window.innerWidth < 768; // adjust breakpoint as needed
+
+  document.querySelectorAll('a[href="#form"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault(); // stops hash from appearing in URL
+
+      if (isMobile()) {
+        // Open your modal
+        openFormModal();
+      } else {
+        // Smooth scroll to hero form
+        const heroForm = document.getElementById('hero-form');
+        if (heroForm) {
+          heroForm.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+  });
+});
+
+function openFormModal() {
+  const modal = document.getElementById('form-modal'); // adjust to your modal's ID
+  if (modal) {
+    modal.classList.add('open'); // or however you currently toggle it
+    modal.removeAttribute('hidden');
+  }
+}
+
+</script>
