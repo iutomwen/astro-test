@@ -1,0 +1,102 @@
+<div id="exit-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h2>Wait! Before you go...</h2>
+    <p>Get a free quote or leave your email and we’ll reach out.</p>
+
+    <form>
+      <input type="email" placeholder="Your email" required />
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<script>
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 9999;
+}
+
+.modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  border-radius: 12px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+</script>
+
+<script>
+  (function () {
+    const modal = document.getElementById('exit-modal');
+    const closeBtn = document.querySelector('.modal-close');
+
+    let hasShown = false;
+
+    function showModal() {
+      if (hasShown) return;
+      hasShown = true;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideModal() {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    // Exit intent detection (desktop)
+    document.addEventListener('mouseout', (e) => {
+      if (e.clientY <= 0) {
+        showModal();
+      }
+    });
+
+    // Close actions
+    closeBtn.addEventListener('click', hideModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) hideModal();
+    });
+
+    // Optional: prevent showing again in same session
+    if (sessionStorage.getItem('exitModalShown')) {
+      hasShown = true;
+    } else {
+      document.addEventListener('mouseout', () => {
+        sessionStorage.setItem('exitModalShown', 'true');
+      }, { once: true });
+    }
+  })();
+</script>
+// Mobile fallback (show after 10s)
+if ('ontouchstart' in window) {
+  setTimeout(() => {
+    showModal();
+  }, 10000);
+}
+
