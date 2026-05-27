@@ -1,0 +1,54 @@
+---
+interface Props {
+  videoId: string;
+  thumbnail: string;
+  title?: string;
+}
+
+const {
+  videoId,
+  thumbnail,
+  title = "Video"
+} = Astro.props;
+---
+
+<div
+  class="vimeo-lite"
+  data-video-id={videoId}
+>
+  <button
+    class="vimeo-lite__button"
+    aria-label={`Play ${title}`}
+  >
+    <img
+      src={thumbnail}
+      alt={title}
+      loading="lazy"
+      decoding="async"
+      width="1280"
+      height="720"
+    />
+
+    <span class="play-button"></span>
+  </button>
+</div>
+
+<script>
+document.querySelectorAll(".vimeo-lite").forEach((wrapper) => {
+  const button = wrapper.querySelector("button");
+
+  button?.addEventListener("click", () => {
+    const videoId = wrapper.dataset.videoId;
+
+    wrapper.innerHTML = `
+      <iframe
+        src="https://player.vimeo.com/video/${videoId}?autoplay=1"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+        loading="lazy"
+        style="width:100%;height:100%;aspect-ratio:16/9;border:0"
+      ></iframe>
+    `;
+  });
+});
+</script>
