@@ -1,0 +1,86 @@
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# NPM shortcuts
+alias ni="npm install"
+alias nid="npm install --save-dev"
+alias nu="npm uninstall"
+alias nr="npm run"
+alias nrd="npm run dev"
+alias nrb="npm run build"
+alias nrs="npm run start"
+alias nrl="npm run lint"
+alias nrt="npm run test"
+alias ndeploy="npm run deploy"
+alias nrp="npm run preview"
+alias nci="npm ci"
+alias ncc="npm cache clean --force"
+alias nls="npm list --depth=0"
+alias nou="npm outdated"
+alias nup="npm update"
+
+# Git shortcuts
+alias gs="git status"
+alias ga="git add ."
+alias gaa="git add --all"
+alias gl="git log --oneline --graph --decorate"
+alias gpl="git pull origin \$(git branch --show-current)"
+alias gf="git fetch --all"
+
+# Git commit with message
+gcm() {
+  if [ -z "$1" ]; then
+    echo "Usage: gcm \"commit message\""
+  else
+    git commit -m "$1"
+  fi
+}
+
+# Git push to current branch with origin
+gp() {
+  local branch=$(git branch --show-current)
+  git push origin "$branch" "$@"
+}
+
+# Git push force (use with caution)
+gpf() {
+  local branch=$(git branch --show-current)
+  git push origin "$branch" --force-with-lease
+}
+
+# Git checkout new branch
+gcb() {
+  if [ -z "$1" ]; then
+    echo "Usage: gcb <branch-name>"
+  else
+    git checkout -b "$1"
+  fi
+}
+
+# Git checkout existing branch
+gco() {
+  if [ -z "$1" ]; then
+    echo "Usage: gco <branch-name>"
+  else
+    git checkout "$1"
+  fi
+}
+
+# Git rebase
+grb() {
+  if [ -z "$1" ]; then
+    git rebase origin/main
+  else
+    git rebase "$1"
+  fi
+}
+
+# Quick add, commit, and push
+gacp() {
+  if [ -z "$1" ]; then
+    echo "Usage: gacp \"commit message\""
+  else
+    git add . && git commit -m "$1" && git push origin $(git branch --show-current)
+  fi
+}
