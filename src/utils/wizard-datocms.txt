@@ -1,0 +1,49 @@
+	•	label — Single-line string
+	•	value — Single-line string
+
+2. survey_question (block)
+
+	•	label — Single-line string
+	•	description — Multi-line text (optional)
+	•	type — Single-line string, dropdown editor, enum validation: text, textarea, radio, checkbox, select
+	•	placeholder — Single-line string (optional)
+	•	required — Boolean
+	•	options — Modular content field, restricted to survey_option block (only relevant for radio/checkbox/select — just leave empty for the others)
+
+3. survey (model)
+
+	•	title — Single-line string
+	•	slug — Slug (from title)
+	•	questions — Modular content field, restricted to survey_question block
+	•	gate_heading / gate_description — optional string/text overrides for the callback-gate copy
+	•	results_heading — optional string
+
+Because questions is a modular-content field, editors can add/remove/reorder question blocks freely — that’s what gives you “as many surveys as I want, no new code.”
+
+On the callback form: since you said it’s constant across every survey, I kept it as a fixed React component (CallbackForm.jsx) rather than a CMS model — simpler, and avoids editors accidentally breaking your lead-capture logic. If you do want its copy editable, add a singleton callback_form model (just heading/description/submit-label strings) and pass those into 
+
+
+query Survey($slug: String!) {
+  survey(filter: { slug: { eq: $slug } }) {
+    title
+    gateHeading
+    gateDescription
+    resultsHeading
+    questions {
+      ... on SurveyQuestionRecord {
+        id
+        label
+        description
+        type
+        placeholder
+        required
+        options {
+          ... on SurveyOptionRecord {
+            label
+            value
+          }
+        }
+      }
+    }
+  }
+}
