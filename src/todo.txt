@@ -23,3 +23,165 @@ National curriculum - maths
 white rose scheme - for maths and english in every stage 
 
 English- Grammar and punctuation
+
+
+Plan: AI-Assisted LMS on Vinext + Cloudflare
+Build an extracurricular, curriculum-aligned LMS for UK primary/secondary students using Vinext + Cloudflare-native services.
+Architecture: edge-first app on Workers, D1 as source of truth, KV for caching/session acceleration, R2 for artifacts, Durable Objects for stateful real-time flows, Workers AI for feedback/adaptive targeting.
+UX: mobile-first responsive design system (shadcn/ui style), with light/dark mode and accessible interaction patterns.
+
+Scope You Requested
+Parent and child login, plus admin support.
+Homework cadence: 4 days/week.
+Awards when work is completed.
+UK curriculum alignment:
+Primary: Y3-Y6, SAT focus, National Curriculum, White Rose progression for maths/english, grammar/punctuation.
+Secondary: Y7-Y9 with exam-board variants (OCR A/B, Edexcel, AQA, Eduqas).
+Subjects:
+Primary: maths, english, science, RE, computing.
+Secondary: maths, english, chemistry, physics, biology, computing/AI/coding.
+Adaptive learning: use wrong answers to set new targets.
+Writing and essay support.
+Parent-child overview dashboards.
+Admin support system for bugs/issues/recommendations.
+Modern UI with shadcn/ui approach and dark/light mode.
+Delivery Phases
+Phase 0: Product Definition (1 week)
+Confirm product positioning as supplemental tutoring platform (not school SIS).
+Finalize MVP curriculum boundaries (Primary first, Secondary staged).
+Define measurable success metrics:
+Weekly homework completion rate.
+Target improvement rate.
+Parent engagement frequency.
+Phase 1: Platform Foundation (1-2 weeks)
+Scaffold Vinext app targeting Cloudflare Workers runtime.
+Configure Cloudflare environments:
+dev, staging, prod bindings for D1/KV/R2/DO/AI.
+Set up CI/CD gates:
+typecheck, lint, tests, migration checks, preview deploy.
+Add baseline observability:
+structured logs, request IDs, error tracing, analytics events.
+Phase 2: Data + Auth Core (2 weeks)
+Build D1 schema with Drizzle for:
+users, households, roles, children.
+curriculum taxonomy (stage/year/subject/board/objectives).
+homework cycles, assignments, submissions.
+targets, awards, progress snapshots.
+support tickets and audit logs.
+Integrate Better Auth with role policies:
+parent, child, admin.
+Implement secure authorization checks on all protected actions.
+Add parent “view child” context mode with auditable session boundaries.
+Phase 3: Core LMS MVP (3-4 weeks)
+Homework engine:
+Auto-create 4 assignments/week per child.
+Child app experience:
+weekly tasks, submission flow, feedback view, streak status.
+Parent app experience:
+household overview, per-child completion/progress, award feed.
+Awards:
+completion badges, streak milestones, consistency rewards.
+Add primary curriculum packs (Y3-Y6):
+SAT-tagged objectives.
+White Rose progression mapping.
+Grammar/punctuation strands in English.
+Add assignment types:
+practice sets.
+writing/essay tasks.
+Phase 4: AI-Assisted Learning (2-3 weeks)
+Integrate Workers AI for:
+hints and misconception explanations.
+essay improvement feedback.
+Adaptive target engine:
+classify wrong answers by misconception type.
+generate next targets with difficulty adjustments.
+Safety and quality rails:
+age-appropriate prompts.
+explainable feedback snippets.
+parent/admin override and review markers.
+Persist AI outputs for quality audits and iterative tuning.
+Phase 5: Secondary + Exam Boards (2-3 weeks)
+Expand curriculum model for Y7-Y9.
+Add board-aware mappings:
+OCR A/B, Edexcel, AQA, Eduqas.
+Introduce secondary subject pathways:
+maths, english, chemistry, physics, biology, computing/AI/coding.
+Add assignment generation rules by board + year + topic.
+Phase 6: Admin Support + Operations (1-2 weeks)
+Build support center:
+bug report, issue tracking, recommendation inbox.
+Add ticket lifecycle:
+open, triaged, in progress, resolved.
+Add operational dashboards:
+unresolved issues.
+AI feedback flags.
+curriculum coverage gaps.
+Phase 7: UI System + Responsive Polish (parallel across Phases 3-6)
+Implement design system using shadcn/ui primitives with custom tokens:
+color, typography, spacing, radius, motion.
+Build mobile-first layouts for:
+parent dashboard.
+child dashboard.
+assignment workspace.
+progress analytics.
+admin support panel.
+Add dark/light mode with persisted user preference.
+Accessibility baseline:
+keyboard navigation.
+clear focus states.
+contrast compliance.
+screen-reader friendly forms and feedback.
+Performance baseline:
+optimized edge rendering.
+lazy-loading for heavy panels/charts.
+resilient loading/skeleton states.
+Phase 8: Hardening + Launch (1-2 weeks)
+Test matrix:
+unit tests (targeting/awards logic).
+integration tests (auth + workflow permissions).
+end-to-end tests (parent/child/admin core journeys).
+Resilience tests:
+retries/idempotency across D1/KV/R2/AI.
+Privacy/security checks:
+retention, export/delete paths, role isolation.
+Staged rollout:
+pilot cohort.
+monitored ramp.
+full release.
+Build Plan By Milestone
+Milestone A: Working auth + role dashboards + D1 schema.
+Milestone B: Homework 4-days/week + submissions + awards.
+Milestone C: AI feedback + adaptive target generation.
+Milestone D: Secondary/exam-board expansion.
+Milestone E: Admin support system + production hardening.
+Recommended Tech Stack (Modern Edge-First)
+Runtime/App: Vinext + Cloudflare Workers.
+Database/ORM: D1 + Drizzle ORM.
+Auth: Better Auth with role-based policies.
+Cache: KV for read acceleration and short-lived derived state.
+Files: R2 for essay uploads/artifacts.
+Stateful coordination: Durable Objects.
+AI: Workers AI for hints, feedback, adaptive recommendations.
+UI: shadcn/ui approach + Tailwind + custom design tokens.
+Testing: Vitest + Playwright.
+CI/CD: GitHub Actions + Cloudflare deploy environments.
+Critical Risks and Mitigations
+Curriculum/IP constraints:
+Use tagged objective mappings and licensed/approved content pipelines.
+AI quality with children:
+strict prompts, safety filters, human override, audit logs.
+Experimental framework drift (Vinext):
+pin versions, isolate adapters, maintain compatibility test suite.
+Data privacy/compliance:
+explicit consent and data lifecycle controls from MVP stage.
+Multi-service consistency:
+idempotent workflows and compensation strategies for partial failures.
+MVP Acceptance Criteria
+Parent and child can authenticate and see role-specific dashboards.
+Each child receives exactly 4 weekly homework items.
+Child can submit work and receive feedback.
+Wrong-answer analysis updates next targets.
+Completion triggers awards/streak logic.
+Parent can view child progress overview.
+Admin can submit/track support issues.
+UI is responsive on mobile and desktop with light/dark mode.
