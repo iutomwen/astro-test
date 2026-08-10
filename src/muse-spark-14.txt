@@ -1,0 +1,27 @@
+Act as a Principal Systems Architect specializing in low-latency event distribution, Cloudflare Workers WebSockets, and reactive frontend state tracking.
+
+Generate a cross-platform Real-Time Notification System featuring a reusable client-side navigation notification component (`src/components/notification-bell.tsx`) and an accompanying Vinext edge API route socket orchestrator (`src/app/api/notifications/stream/route.ts`). This infrastructure must instantly dispatch unread count state adjustments and popover event logs to any user across all 5 roles ('admin', 'parent', 'tutor', 'student', 'customerService') the exact second an interaction occurs.
+
+Do not truncate code blocks, do not leave empty evaluation handlers, and enforce complete compatibility with Shadcn UI and Tailwind CSS.
+
+### 1. FRONTEND NOTIFICATION BELL PRIMITIVE (`src/components/notification-bell.tsx`)
+Build an engaging, accessible navigation widget utilizing Shadcn Popover and ScrollArea primitives:
+- Trigger Button: A clean, absolute-positioned navigation item wrapping a Lucide Bell icon. Include a vibrant, pulsing crimson notification badge indicator (`absolute -top-1 -right-1 w-4 h-4 text-[10px] bg-destructive rounded-full flex items-center justify-center`) that dynamically renders the raw numeric unread count. Hidden if count is strictly 0.
+- Dropdown Popover Frame: Clicking the item expands a structured overlay containing:
+  * Header Panel: Labeled "Notifications" with a functional "Mark all as read" click button.
+  * Active Notification Feed: A scrolling area looping through the latest 5 unread alerts. If the event type matches a new message, display an avatar marker, the sender's role tag, a truncated snippet of the text payload, and a relative timestamp indicator.
+  * Interactive Redirection: Clicking a notification item must instantly fire a local update action, decrement the global badge state array, and programmatically route the user to their matching active sub-workspace layout (e.g., redirecting students to `/dashboard/chat`).
+
+### 2. EDGE WEBSOCKET EVENT DISPATCHER (`/notifications/stream/route.ts`)
+In the backend Vinext route file, implement native Cloudflare network bindings to maintain lightweight real-time state connections:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Upstream Connection Upgrade: Intercept client fetch protocols targeting this route. Securely validate the incoming better-auth edge session token to verify user identity. Upgrade authorized lines instantly using `new Response(null, { status: 101, webSocket: clientSocket })`.
+- Ephemeral Mapping Pipeline: On a successful connection, map the user's ID inside a regional Worker memory register or Cloudflare KV block so downstream services can look up and target their active socket lines instantly when writing messages.
+
+### 3. DOWNSTREAM TRIGGER BINDING & PERSISTENCE
+- Cross-System Execution Interception: Inside our existing chat execution routes (`src/app/api/chat/connect/route.ts`), after a message commits to the D1 database, your code must invoke an asynchronous, non-blocking fetch to this notification engine.
+- Event Package Distribution: Broadcast a standardized JSON payload structure down the target socket line: `{ id: string, type: 'new_message', title: string, body: string, createdAt: string }`. If the user is currently offline, catch the socket miss gracefully and save the payload down into the D1 `notifications` table as an unread item to be loaded on their next browser initialization.
+
+### 4. PRESENTATION METRICS & THEMING
+- Responsive Media Toggles: Ensure the notification popover scales safely inside tightly packed mobile sidebars or top bars without causing horizontal viewport leakage.
+- Dark Mode Tokens: Synchronize all list containers, popover borders, read/unread states, and action triggers with rich semantic markers (`bg-popover`, `border-border`, `text-muted-foreground`, `dark:bg-zinc-900`) responding seamlessly to system theme switches.
