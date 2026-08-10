@@ -1,0 +1,28 @@
+Act as a Principal Frontend Engineer specializing in advanced data management dashboards, TypeScript definitions, and robust Shadcn Data Table implementations.
+
+Generate the complete Admin User Multi-Tenant Directory View (`src/app/dashboard/admin/directory/page.tsx`) for our Cloudflare Vinext LMS application. This interface allows an administrator to manage, search, and filter all platform users across multiple organizational tenants.
+
+Do not truncate code blocks, do not write pseudo-code loops, and explicitly handle empty data boundaries, sorting mutations, and client states.
+
+### 1. DATA TYPES & INTERFACES
+Define explicit TypeScript interfaces for the table structure matching our Drizzle core schema layout:
+- UserItem: id (string), name (string), email (string), role ('admin' | 'parent' | 'tutor' | 'student' | 'customerService'), tenantId (string), tenantName (string), status ('active' | 'suspended' | 'pending'), and createdAt (string).
+
+### 2. SHADCN DATA TABLE UTILITY (`@tanstack/react-table`)
+Implement a fully functional data grid layer integrating the following concrete column configurations:
+- Column Selection: A leading master checkbox column permitting multi-row selections for bulk administrative actions.
+- Identity Grouping: A unified 'User' cell beautifully blending the user's avatar fallback icon, name string, and lowercase email text into a stacked typographic block.
+- Tenant Identification: A clean badge mapping the specific school, institution, or organizational tenant they belong to.
+- Role/Status Badges: Explicit visual color-coding parameters for Roles (e.g., Violet for Admin, Amber for Tutor, Blue for Student) and Statuses (Green for Active, Red for Suspended) using Shadcn Badges.
+- Contextual Actions: A trailing Dropdown Menu column housing action triggers for 'Edit Permissions', 'Change Tenant Bindings', 'Impersonate Session', and a destructive 'Suspend Account' option.
+
+### 3. CLIENT-SIDE SEARCH, FILTERS & CONTROLS
+Position a clean, sticky controls toolbar directly above the data grid component containing:
+- Fuzzy Search Bar: A responsive input field hooked into the React Table filtering state to parse names, emails, and tenant strings instantly.
+- Role Filtering Dropdown: A faceted selection menu allowing the admin to narrow the view exclusively down to one or more of the 5 core platform roles.
+- Bulk Action Trigger: A dynamic button that automatically reveals itself only when 1 or more row checkboxes are selected, presenting global controls like 'Bulk Move Tenants' or 'Bulk Export CSV'.
+
+### 4. DESIGN MECHANICS & EDGE PREPARATIONS
+- Complete Pagination: Add a robust table footer showing item counts (e.g., "Showing 1-10 of 142 rows") with fully responsive "First/Previous/Next/Last" navigation buttons matching Shadcn standards.
+- Edge Architecture Notes: Fetch data using a modular async React client function designed to easily swap out mock states for real standard Cloudflare D1 JSON API payloads (`/api/admin/users`) downstream.
+- Dark Mode Primitives: Style all table cells, borders, headers, and selection backgrounds using clean semantic utility variables (`bg-card`, `border-border`, `text-muted-foreground`, `hover:bg-muted/50`) responding to theme states flawlessly.
