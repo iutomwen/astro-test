@@ -1,0 +1,27 @@
+Act as a Principal Systems Observability Engineer and Data Visualization Architect specializing in high-throughput dashboard telemetry and Cloudflare performance monitors.
+
+Generate the Unified Diagnostic Dashboard View (`src/app/dashboard/admin/diagnostics/page.tsx`) and its accompanying Vinext edge API route handler (`src/app/api/admin/diagnostics/metrics/route.ts`). This interface acts as a real-time system monitoring panel accessible strictly to users with the 'admin' role, compiling infrastructure logs, AI model failure rates, database latencies, and tenant metrics.
+
+Do not truncate code blocks, do not write dummy logic arrays, and implement full structural alignment with Shadcn UI grid primitives and Tailwind CSS themes.
+
+### 1. OBSERVABILITY KPI CARDS & STATUS GRID
+Design a dense, top-level status layout containing 4 diagnostic summary cards:
+- Compute Health Card: Renders active Cloudflare Worker execution time, memory usage percentiles, and incoming requests/sec using a real-time pulse indicator.
+- Edge Streaming Health Card: Tracks active WebSocket count lines and concurrent Cloudflare RealtimeKit video channels.
+- D1 Database Telemetry Card: Displays average query execution latency in milliseconds, row mutations counter, and remaining local storage allocations.
+- AI Pipeline Performance Card: Tracks total inference tasks dispatched via workers-ai, model cache hit ratios, and a critical grading parser error-rate metric.
+
+### 2. REAL-TIME TELEMETRY CHARTS & DATA LISTS (SHADCN UI)
+Position two key administrative visualization panels beneath the metrics grid:
+- Operational Latency Table: A clean, compressed list view displaying recent system tasks (e.g., 'Better-Auth Token Sign-in', 'D1 Schema Update', 'AI Homework Prompt Streaming') stamped with exact durations, method types, and color-coded status pills (Green for under 200ms, Amber for degraded performance, Red for failure timeouts).
+- Multi-Tenant Load Matrix: A concise summary component showing load split ratios across active tenants ('Alpha Academy' vs 'Delta District'), tracking active users per site and support ticket backlogs.
+
+### 3. VINEXT EDGE DIAGNOSTIC METRICS ROUTE
+In the backend API handler file, implement native Cloudflare network telemetry gathers:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Airtight Isolation Guards: Intercept the better-auth edge session context. Confirm that the user's role string is strictly verified as 'admin'. Return a 403 Forbidden status immediately if validation checks fail or if the request originates outside trusted admin network headers.
+- Aggregated Analytics Engine: Query the D1 environment to fetch transaction metrics. Concurrently execute internal telemetry lookups to check current AI execution counters stored in Cloudflare KV namespaces, returning a unified, heavily cached JSON metrics package.
+
+### 4. PRESENTATION METRICS & THEMING
+- Responsive Diagnostics Adaptation: Group graphs and list feeds into side-by-side structures on desktop screens, gracefully wrapping them down into singular chronological vertical columns on mobile and tablet viewport widths.
+- Cybernetic Dark Mode tokens: Style the metrics interface with specialized diagnostic variables. In Dark mode, implement deep charcoal canvas backdrops (`bg-zinc-950`), border structures (`border-zinc-800`), muted gridlines, and glowing emerald/amber status typography that responds cleanly to system-wide theme switches.
