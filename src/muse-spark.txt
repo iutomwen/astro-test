@@ -1,0 +1,40 @@
+Act as a Principal Full-Stack Engineer specializing in Vite, the Cloudflare Workers ecosystem, and secure multi-role database architectures. 
+
+Our goal is to scaffold the foundational database, authentication, and routing-guard layer for a secure, multi-role AI-assisted LMS. The application is built on Cloudflare Vinext (Vite + Next.js compatibility layer), utilizing Cloudflare D1 via Drizzle ORM, better-auth, Shadcn UI, and Tailwind CSS.
+
+Do not truncate code blocks, do not write generic placeholders, and implement all 5 roles explicitly.
+
+### 1. ENVIRONMENT & CONFIGURATION
+Generate the following core configuration files ensuring absolute edge runtime compatibility:
+- `wrangler.toml`: Set up a local development environment binding a D1 database named 'lms-db' to the binding variable 'DB'.
+- `drizzle.config.ts`: Configure for the 'cloudflare-d1' driver, targeting a schema file located at `./src/db/schema.ts` and migrations folder at `./drizzle`.
+- `tailwind.config.ts` & `src/app/globals.css`: Fully configure Tailwind CSS v4 variables with custom design tokens for light and dark modes, supporting seamless toggling via class attributes.
+
+### 2. CORE DATABASE SCHEMA (`src/db/schema.ts`)
+Write a complete TypeScript schema using `drizzle-orm/sqlite-core`. It must include:
+- A strict TypeScript/Drizzle text-enum for the 5 User Roles: 'admin', 'parent', 'tutor', 'student', 'customerService'.
+- A 'users' table extending the default better-auth core schema, explicitly adding a 'role' column (defaulting to 'student'), a 'createdAt' timestamp, and an 'updatedAt' timestamp.
+- The standard better-auth required tables: 'sessions', 'accounts', 'verifications' (for Magic Link tokens), and 'passwords' (for username/password hashing storage).
+
+### 3. AUTHENTICATION INFRASTRUCTURE (`src/lib/auth.ts`)
+Configure `better-auth` for the Cloudflare Worker edge environment:
+- Import and initialize the Better-Auth instance using the Drizzle adapter connected to the Cloudflare D1 environment context.
+- Enable the following native plugins/strategies:
+  1. Username/Password authentication (with robust password hashing configuration).
+  2. Magic Link authentication via Email.
+  3. OAuth handlers for Google and GitHub.
+- Extend the session and user token payloads to explicitly include the user's 'role' string so it is available on both the client and server edge contexts without throwing TypeScript type errors.
+
+### 4. MIDDLEWARE ROUTE GUARDS (`src/middleware.ts`)
+Implement a comprehensive, traffic-optimized Edge Middleware using Vinext's routing engine to guard boundaries between the 5 user roles:
+- Parse incoming requests to intercept sessions securely via better-auth server-side verification hooks.
+- Create a strict, typed routing dictionary block mapping paths to allowed roles:
+  * `/dashboard/admin/*` -> Only 'admin'
+  * `/dashboard/tutor/*` -> 'admin', 'tutor'
+  * `/dashboard/parent/*` -> 'admin', 'parent'
+  * `/dashboard/student/*` -> 'admin', 'student'
+  * `/dashboard/support/*` -> 'admin', 'customerService'
+- Include a default catch-all that securely redirects unauthenticated users trying to access any `/dashboard/*` path back to `/login`, and redirects authenticated users targeting `/login` safely back to their respective dashboard homepages based on their verified role enum.
+
+### 5. SYSTEM VERIFICATION
+Once files are written, execute a local syntax verification scan. If Drizzle compilation or Vinext routing type mismatches occur, self-correct the shims immediately using native web-standard API configurations.
