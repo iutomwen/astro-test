@@ -1,0 +1,33 @@
+Act as a Principal Full-Stack Engineer and Curriculum Architect specializing in AI generation engines and Cloudflare Workers.
+
+Generate an AI Homework Builder component (`src/app/dashboard/tutor/homework-builder/page.tsx`) and its accompanying Vinext edge API route handler (`src/app/api/tutor/homework/generate/route.ts`). This tool allows tutors to generate structured, curriculum-aligned homework tasks based on the current academic year (2026), specific subjects, and targeted student roles.
+
+Do not truncate code blocks, do not leave empty placeholders, and implement full Light/Dark mode token synchronization.
+
+### 1. FRONTEND BUILDER INTERFACE (SHADCN UI)
+Create a modern, clean generation dashboard containing:
+- Parameter Selection Form: Built using Shadcn Select and Input components to capture:
+  * Academic Year / Grade level selector.
+  * Subject dropdown (e.g., Mathematics, Sciences, English Literature, History).
+  * Curriculum Standard context (e.g., GCSE 2026, Common Core, IB Framework).
+  * Specific topic focus text field (e.g., "Quadratic Equations", "Cellular Respiration").
+  * Homework Type toggle ('multiple-choice', 'short-answer essays', 'hybrid execution tasks').
+- Interactive Live Preview Pane: A split-screen layout displaying an elegant, styled preview of the generated homework assignment as it renders, including grading rubrics, explicit instructions, and a print/export layout preview.
+
+### 2. EDGE RUNTIME RUNTIME BINDINGS & CONSTRAINTS
+In the backend route handler file, strictly implement Cloudflare's runtime syntax:
+- Environment Imports: Use exactly: `import { env } from "cloudflare:workers";`
+- Multi-Service Bindings: Access platform assets via the runtime environment context:
+  * `env.AI` -> To dispatch text-generation tasks via Workers AI.
+  * `env.DB` -> For logging generated tasks into Cloudflare D1 via Drizzle ORM.
+
+### 3. CURRICULUM-AWARE AI INFERENCE PIPELINE
+Configure the text generation endpoint to enforce current compliance standards:
+- Access Control: Verify the incoming better-auth session. Ensure the user's role is strictly checked as 'admin' or 'tutor'. Return a 403 response if verification fails.
+- Model Targeting: Execute inference tasks using `@cf/meta/llama-3.1-70b-instruct` or an equivalent high-reasoning model context bound locally inside Workers AI.
+- Current-Year System Constraints: Write a explicit system prompt instructing the model: "The current academic year is 2026. Generate a homework assignment strictly synchronized with current 2026 global curriculum guidelines for the selected subject and grade."
+- Output Formatting Rules: Force the model to output a pristine, valid JSON object containing: `title` (string), `estimatedTimeMinutes` (number), `instructions` (string), `tasks` (Array<{ id: number, question: string, markingCriteria: string, maxPoints: number }>), and `teacherAnswerKey` (string). Ensure no conversational text or markdown blocks wrap the payload.
+
+### 4. DATA LOGGING & REPOSITORY ARCHITECTURE
+- Schema Synchronization: Once generated and successfully validated via `JSON.parse()`, execute a clean Drizzle SQL transactional statement to write the homework object to the D1 database instance (`env.DB`), linking it to the creating tutor's user ID and target course mapping definitions.
+- Error Interception: Wrap the generation block in a try-catch loop. If validation fails or AI tokens run out, gracefully drop back to a structured 500 JSON payload displaying an actionable layout notice.
