@@ -1,0 +1,28 @@
+Act as a Principal Frontend Engineer specializing in highly responsive React dashboard layout architectures and Tailwind CSS layouts.
+
+Generate the main Dashboard Navigation Shell (`src/components/dashboard-shell.tsx`) and layout structure for our Cloudflare Vinext application. The component must act as the primary wrapper for all routes under `/dashboard/*` and dynamically filter navigation elements depending on the current user's authenticated role.
+
+Do not truncate code blocks, do not leave empty placeholder arrays, and implement all 5 roles explicitly with distinct, logical feature items.
+
+### 1. LAYOUT ARCHITECTURE & RESPONSIVENESS
+- Desktop View: A persistent, elegant left-side navigation sidebar that takes up minimal visual real estate but remains anchored to the screen height (`h-screen`). 
+- Mobile View: The sidebar must automatically collapse into a hidden state. Provide a clean, sticky top navigation header bar containing a hamburger menu icon that triggers a fluid, slide-out overlay Sheet/Drawer component for mobile touch navigation.
+- Main Content Area: A fully responsive scrollable container (`flex-1 overflow-y-auto`) wrapping the page children, featuring balanced padding and a clean breadcrumb utility component tracking the active sub-route.
+
+### 2. ROLE-RESTRICTED NAVIGATION DICTIONARY
+Define a highly structured TypeScript navigation routing array map. Each item must contain a route string, a Lucide icon component reference, a clear display title, and an allowedRoles string array. Implement distinct navigation arrays tailored exactly to these rules:
+- Global Items (All 5 Roles): Dashboard Home (`/dashboard`), Settings (`/dashboard/settings`), Profile Management (`/dashboard/profile`).
+- Admin Only: Analytics Overview, User Multi-Tenant Directory, Global System Controls, Cloudflare D1 Monitor.
+- Tutor Only: Course Builder Workspace, Live Lesson Classroom Schedule, Student Gradebook Tracking.
+- Student Only: Enrolled Classroom Courses, Active Assignments Portal, Personal Progress Tracker.
+- Parent Only: Linked Student Progress metrics, Tutor Direct Messaging Dashboard, Tuition Billing & Invoicing.
+- Customer Service Only: Help Desk Active Tickets Queue, Live Customer Chat Interface, System Status Logs.
+
+### 3. THEME & ACCOUNT UTILITIES
+- Dark Mode Integration: The sidebar and navigation layouts must react instantly to system theme state changes, utilizing rich dark tokens (`bg-zinc-950/50 backdrop-blur-md border-zinc-800 text-zinc-100`) and soft light tokens.
+- User Context Panel: Anchor a cohesive user profile widget at the bottom of the sidebar. It must dynamically render the user's avatar icon, email address, and a visual badge badge displaying their active role title.
+- Profile Dropdown: Clicking the profile widget must toggle an accessible dropdown menu containing a fast theme switcher (Light / Dark / System) and a clean "Log Out" trigger binding to the `authClient.signOut()` engine.
+
+### 4. COMPATIBILITY & SYSTEM BINDINGS
+- State & Active Routing: Use Vinext/Next client hooks (such as `usePathname()`) to detect active sub-routes and dynamically inject active Tailwind styling classes (`bg-primary text-primary-foreground font-medium`) to highlight the current location.
+- Security Fallback: If a user somehow manually navigates to an item not present in their authorized navigation dictionary map, the shell wrapper must safely intercept the render, block content injection, and display an absolute 403 Forbidden Access State view.
