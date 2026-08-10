@@ -1,0 +1,26 @@
+Act as a Principal Edge Infrastructure Engineer specializing in Cloudflare Workers AI pipelines, Vinext route handlers, and streaming text parsing.
+
+Generate a secure, high-throughput AI Quiz Generation API Route Handler (`src/app/api/courses/generate-quiz/route.ts`) built inside the Cloudflare Vinext framework structure. This endpoint accepts source text parameters, streams an inline structured JSON quiz array back to the client using Server-Sent Events (SSE), and commits final states to Cloudflare D1.
+
+Do not truncate code blocks, do not leave empty stream loops, and enforce strict edge runtime types.
+
+### 1. PLATFORM RUNTIME BINDINGS
+- Environment Fetching: You must use native Cloudflare syntax to extract network and AI module contexts. Use exactly: `import { env } from "cloudflare:workers";`
+- Multi-Service Bindings: Access the platform assets directly through the runtime environment context:
+  * `env.AI` -> For running Workers AI inference catalog tasks.
+  * `env.DB` -> For Drizzle-mapped D1 database mutations.
+  * `env.MY_KV_NAMESPACE` -> For ephemeral quota track state flags.
+
+### 2. SECURITY, QUOTAS & INPUT VALIDATION
+- Session Extraction: Intercept the incoming request headers to extract the better-auth edge session context. Verify that the authenticated user's role is strictly registered as 'admin' or 'tutor'. Return a 403 JSON error immediately if validation checks fail.
+- KV Rate Limiting: Use the user's ID as a storage key inside `env.MY_KV_NAMESPACE` to check rapid generation counters. Enforce a maximum threshold of 5 concurrent quiz requests per hour per user.
+- Parameter Parsing: Extract the JSON payload containing `courseId` (string), `sourceText` (string, max 10,000 characters), `questionCount` (number, default 5), and `difficulty` ('easy' | 'medium' | 'hard').
+
+### 3. STREAMING WORKERS AI INFERENCE ENGINE
+- Model Targeting: Execute text generation using the `@cf/meta/llama-3.1-70b-instruct` model or equivalent premium instruction-following asset bound locally inside Workers AI.
+- System Prompt Constraints: Feed a strict structural system context block explicitly instructing the model to reply ONLY with a raw, valid JSON array containing objects matching this type schema: `Array<{ question: string, options: string[], correctAnswerIndex: number, explanation: string }>`. Explicitly forbid markdown block wrappings (like ```json), conversational intros, or trailing explanations.
+- SSE Response Handling: Trigger `env.AI.run()` with `stream: true`. Instantiate a new `ReadableStream` engine to process the incoming token chunks. Transform raw LLM fragments into clean Server-Sent Events format data blocks (`data: { "chunk": "..." }\n\n`) and pipe them continuously back to the frontend client to keep page latency minimal.
+
+### 4. POST-GENERATION TRANSACTION PIPELINE
+- Asynchronous Logging: As the stream finishes processing, capture the complete concatenated string payload inside the Worker memory space. 
+- Validation & Database Commit: Pass the final text string through a local `JSON.parse()` wrapper inside a safe try-catch construct. If parsing succeeds, execute a clean Drizzle SQL insert operation targeting our D1 database instance (`env.DB`) to permanently log the structured quiz metadata rows linked to the destination `courseId`, tracking creation timestamps and the creating instructor's user ID.
