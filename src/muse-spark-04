@@ -1,0 +1,24 @@
+Act as a Principal Backend Engineer specializing in Cloudflare Workers, Vinext API route engines, and Drizzle ORM integration.
+
+Generate the secure backend API Route Handler (`src/app/api/admin/users/route.ts`) that serves filtered, paginated multi-tenant user data to our Admin User Directory table. The endpoint must enforce strict role checking using better-auth session validation and interface directly with Cloudflare D1.
+
+Do not truncate code blocks, do not leave empty processing blocks, and implement all filter parameters explicitly.
+
+### 1. RUNTIME & BINDING CONSTRAINTS
+- Native Environment Fetching: You must use the official Cloudflare syntax to capture database and authentication bindings. Use exactly: `import { env } from "cloudflare:workers";`
+- DB Initialization: Inside the route context, instantiate Drizzle ORM dynamically by passing the local context binding: `const db = drizzle(env.DB);` where 'DB' corresponds to our wrangler.toml D1 database binding asset.
+
+### 2. AUTHENTICATION & ACCESS CONTROL
+- Edge Session Interception: Initialize the better-auth server client hook using the runtime context parameters.
+- Strict Guard Check: Extract the active user session. If no session is found, or if the user's verified role string is not strictly equal to 'admin', immediately terminate processing and return a clean `Response.json({ error: "Unauthorized access" }, { status: 403 })`.
+
+### 3. ADVANCED SQL QUERY PIPELINE (DRIZZLE ORM)
+Parse incoming search queries directly from the request URL parameters (`request.url`) to dynamically assemble the Drizzle SQL matching statement:
+- Pagination Mechanics: Capture 'page' (default 1) and 'pageSize' (default 10) parameters. Calculate clean offset modifiers (`limit` and `offset`) to pass down into the SQL query logic.
+- Text Filter: Check for a 'search' string. If populated, use Drizzle's `like` or `ilike` operations to evaluate matches against the user's 'name' or 'email' fields in the database.
+- Role Filter: Check for a 'role' parameter string. If populated, filter results down strictly to matches inside our 5 core user roles ('admin', 'parent', 'tutor', 'student', 'customerService').
+- Unified Payload Map: Execute the database transactions efficiently. Return a structured JSON response containing an array of 'users' matching our exact UI schema, along with an object mapping 'pagination' metadata (totalRows, totalPages, currentPage).
+
+### 4. DATA SANITISATION & SAFETY
+- Prevent Password Leaks: Ensure the Drizzle `select()` pipeline explicitly isolates and excludes password hashes, verification tokens, or private secrets before outputting data rows to the client layer.
+- Try/Catch Fail-Safes: Wrap the database query process in a robust try-catch block. If D1 connection exceptions or SQL structure errors happen at the edge, return a clean `500 Internal Server Error` containing an obscure diagnostic flag rather than exposing stack traces.
