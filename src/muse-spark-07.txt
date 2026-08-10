@@ -1,0 +1,28 @@
+Act as a Principal Frontend Engineer specializing in highly interactive, state-driven learning portals and responsive React forms.
+
+Generate the Student Homework Portal View (`src/app/dashboard/student/assignments/page.tsx`), the individual assignment interactive workspace (`src/app/dashboard/student/assignments/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`src/app/api/student/assignments/submit/route.ts`). This module allows students to browse their assigned homework, complete multiple-choice or short-answer essay questions, save progress, and submit final answers to Cloudflare D1.
+
+Do not truncate code blocks, do not leave empty placeholder state loops, and implement explicit handling for time tracking and multi-state boundaries.
+
+### 1. STUDENT PORTAL DASHBOARD (`/assignments/page.tsx`)
+Create a clean overview dashboard containing:
+- Faceted State Tabs: Filter assignments into three crisp, reactive views: 'Todo' (Active, incomplete items sorted by nearest deadline), 'Submitted' (Pending teacher/AI review), and 'Graded' (Complete with final scores, performance badges, and tutor feedback).
+- Assignment Metric Cards: Display individual tasks with clear typography showing: Subject Badge (e.g., Mathematics), Estimated Time, Max Points, and a dynamic Countdown Timer badge highlighting urgent deadlines.
+
+### 2. INTERACTIVE WORKSPACE (`/assignments/[id]/page.tsx`)
+Create a focused, distraction-free environment for answering the assignment:
+- Dual-Pane Layout:
+  * Left Pane: Displays the assignment metadata, core instructions, global resource text, and a sticky visual progress bar tracking the percentage of questions completed.
+  * Right Pane: Dynamically maps the array of questions extracted from our JSON database payload. Render 'multiple-choice' using custom Shadcn RadioGroups and 'short-answer essays' using elegant Textareas with character counters.
+- Auto-Save Control: Integrates a continuous, debounced background auto-save event. When a student updates an answer, trigger a rapid fetch request to save the current text draft temporarily into Cloudflare KV, accompanied by a soft "Draft Saved Locally" visual indicator.
+
+### 3. VINEXT EDGE ROUTE SUBMISSION HANDLER
+In the backend API handler file, enforce strict edge safety rules:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle using `const db = drizzle(env.DB);`.
+- Access Control & Session Verification: Validate the incoming better-auth session. Ensure the authenticated user's role is strictly checked as 'student' or 'admin'. Cross-reference the session's student ID with the specific row assignment target. If mismatched, instantly reject with a 403 Forbidden status.
+- Payload Processing: Accept `assignmentId` (string) and `answers` (Array<{ questionId: number, studentResponse: string }>). Ensure fields are sanitized against injection vectors.
+- Transactional Execution: Validate that the submission timestamp sits securely ahead of the designated assignment deadline. If valid, commit the final array payload permanently into the D1 `homework_submissions` table, purge the ephemeral draft payload out of Cloudflare KV, and instantly flip the assignment visibility flag to 'Submitted'.
+
+### 4. PRESENTATION & ACCESSIBILITY MECHANICS
+- Full Responsive Adapters: Ensure multi-choice layouts stack elegantly on mobile screens, and keep input text blocks wide enough for fluid touch typing.
+- Dark Mode Tokens: Synchronize all forms, selections, headers, and container blocks cleanly with rich utility variables (`bg-zinc-950`, `border-zinc-800`, `text-zinc-100`, `focus-visible:ring-primary`) responding smoothly to system-wide theme switches.
