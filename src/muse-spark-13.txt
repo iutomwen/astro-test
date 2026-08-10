@@ -1,0 +1,26 @@
+Act as a Principal Real-Time Media Engineer specializing in WebRTC SFU infrastructure, Cloudflare RealtimeKit SDKs, and streaming session lifecycle hooks.
+
+Generate an interactive live Video/Audio Classroom Workspace component (`src/app/dashboard/classroom/[id]/page.tsx`) and its accompanying Vinext edge API route handler (`src/app/api/classroom/session/route.ts`). This module allows tutors to spin up reusable virtual meeting rooms, and authenticated students to join with media track configurations, leveraging the official `@cloudflare/realtimekit-react` SDK abstractions.
+
+Do not truncate code blocks, do not leave empty component arrays, and enforce full structural edge safety rules.
+
+### 1. FRONTEND REALTIMEKIT VIDEO CLASSROOM (`[id]/page.tsx`)
+Build an engaging, ultra-low-latency layout leveraging `@cloudflare/realtimekit-react` wrappers:
+- Core Provider Integration: Wrap the component workspace inside `RealtimeKitProvider` passing dynamic authenticated room connection tokens initialized via the backend hook.
+- Dual-Participant Grid Layout: Render an elegant, aspect-ratio locked media screen mapping participant states natively. Use `RtkGridView` and `RtkParticipantTileView` to show the tutor's lecture view (configured for a smooth 24 FPS) and the student's responsive stream tile.
+- Interactive Media Control Bar: Provide a persistent, styling-synced bottom toolbar (`RtkControlBarView`) containing explicit toggles for microphone mute states (`RtkMicToggleButton`), camera shutter states (`RtkCameraToggleButton`), and an explicit layout exit button (`RtkLeaveButton`).
+- Native UI Kit Addons: Overlay the layout with a sticky header displaying room titles via `RtkMeetingHeaderView`, a crisp network quality connection flag, and an inline live transcription component mapping conversational tracks locally.
+
+### 2. EDGE RUNTIME SESSION HANDLER (`src/app/api/classroom/session/route.ts`)
+In the backend API handler file, implement native Cloudflare network bindings to issue secure WebRTC tokens:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Authorization Guard Check: Intercept the better-auth edge session token. Validate that the requesting identity belongs strictly to the 'student', 'tutor', or 'admin' roles. Cross-reference the database table to ensure the student user is explicitly assigned to this classroom ID before returning room access metrics. 
+- Token Generation Pipeline: Dispatch an authenticated POST request to Cloudflare's backend API endpoint `/accounts/{account_id}/realtime/kit/meetings` to instantiate or re-verify a valid RealtimeKit reusable room asset. Issue a secure, short-lived client initialization payload carrying the `authToken` string, target room metrics, and designated subscriber roles.
+
+### 3. LIFECYCLE MANAGEMENT & D1 TELEMETRY
+- Persistent State Updates: Right as the authentication endpoint returns a successful token footprint, record a transactional execution event to log the active row update within the D1 `classroom_sessions` table, mapping active participant join timestamps.
+- Auto-cleanup Tracking: Hook into the client-side `onLeave` callback. When a session terminates, fire a background worker beacon to cleanly log session closure times and free occupied channel bindings.
+
+### 4. PRESENTATION METRICS & THEMING
+- Responsive Media Elements: Ensure video containers stack elegantly into focused vertical feeds on mobile dimensions to optimize layouts for students on mobile networks.
+- Dark Mode Tokens: Synchronize all stream panels, button frames, and overlay UI grids using rich semantic utility markers (`bg-background`, `border-border`, `text-foreground`, `dark:bg-zinc-950`) that respond seamlessly to system-wide theme switches.
