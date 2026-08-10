@@ -1,0 +1,26 @@
+Act as an expert Frontend Architect specializing in React, Tailwind CSS v4, and Shadcn UI. 
+
+Generate the unified authentication pages for our Cloudflare Vinext LMS application. The interface must look visually exceptional, highly responsive, and include flawless native support for both Light and Dark mode options.
+
+Do not truncate code blocks, do not use generic placeholders like "// implement later", and handle all forms, state changes, and error UI branches cleanly.
+
+### 1. COMPONENT INFRASTRUCTURE & UI LAYER
+Generate the following modular visual blocks using standard Shadcn UI/Radix-based Tailwind markup:
+- Auth Card Wrapper: An elegant, structured container with smooth hover transitions, subtle edge gradients, and responsive centering.
+- Integrated Loading States: Clean, accessible loading animations (e.g., spinning ring or animated skeleton indicators) to represent network and submission delays.
+- Clean Feedback Modals: Styled Toast or Inline Banner notices to instantly render authentication errors, validation warnings, or success metrics.
+
+### 2. UNIFIED LOGIN INTERFACE (`src/app/(auth)/login/page.tsx`)
+Create a single, highly intuitive page that handles all three required entry methods:
+- OAuth Form Block: Distinct, modern grid buttons for "Sign in with Google" and "Sign in with GitHub" featuring correct branding icons.
+- Traditional Form Block: Email/Username and Password inputs with real-time text visibility toggles (eye icon) and an explicit, styled link pointing to the "Forgot Password" page.
+- Magic Link Toggle: A clean tab or secondary toggle that smoothly transitions the interface to an Email-only view for requesting an instantaneous Magic Link token login.
+
+### 3. ACCOUNT RECOVERY PIPELINE
+Create the complete password-reset visual funnel across two dedicated routes:
+- Request Reset Route (`src/app/(auth)/forgot-password/page.tsx`): A focused form requesting the user's registered email address. On submission, the form must seamlessly transition to a success feedback view instructing them to check their inbox.
+- Secure Reset Route (`src/app/(auth)/reset-password/page.tsx`): A clean, dual-input form accepting 'New Password' and 'Confirm New Password' inputs. Implement visual meter checks for password strength guidelines and intercept url parameters dynamically to bind token contexts securely.
+
+### 4. COMPATIBILITY & SYSTEM BINDINGS
+- State Management: Use standard React 'use state' Hooks combined with 'better-auth/react' client utility methods (`signIn.email`, `signIn.social`, `authClient.forgetPassword`) to manage form dispatches.
+- Theme Integration: Ensure all background, border, input, text, and primary button color tokens hook cleanly into standard Tailwind text/bg primitives (`bg-background`, `text-foreground`, `border-input`, `dark:bg-zinc-950`) to react instantly when the Light/Dark mode utility is toggled.
