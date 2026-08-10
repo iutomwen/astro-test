@@ -1,0 +1,24 @@
+Act as a Principal Frontend Engineer specializing in nested layout architectures, complex drag-and-drop or accordion states, and content management workflows.
+
+Generate the Tutor Course Builder Workspace View (`src/app/dashboard/tutor/courses/[id]/builder/page.tsx`) and its accompanying Vinext edge API route handler (`src/app/api/tutor/courses/materials/route.ts`). This workspace allows authenticated users with the 'tutor' role to manage an individual course structure, split content into modular chapters, paste or upload rich text source materials, and flag topics for AI automated generation.
+
+Do not truncate code blocks, do not leave empty placeholder loops, and implement full structural alignment with Shadcn UI and Tailwind CSS.
+
+### 1. COURSE BUILDER WORKSPACE INTERFACE (SHADCN UI)
+Design a comprehensive split-view configuration containing:
+- Left-Side Sidebar (Course Outline Outline Tracker): A fluid navigation column using Shadcn Accordion components representing Chapters and Sub-modules. Each sub-module item must display its title, content length indicator, and a status badge ('Draft' | 'Published' | 'AI-Ready'). Provide a distinct "Add New Module" button at the foot of the menu.
+- Right-Side Pane (Source Material Editor Portal): When a module is selected, load a rich control workspace containing:
+  * Module Metadata Fields: Input text slots for Chapter Title and Summary definitions.
+  * Deep Source Material Input: A large, responsive Shadcn Textarea or collaborative editor field allowing tutors to paste raw textbooks, syllabi outlines, or 2026 curriculum notes (max 20,000 characters). Include a real-time character and word count tracking metric beneath the frame.
+  * AI Feature Injection Hub: Position an interactive toolbar featuring explicit "Generate AI Quiz from This Material" and "Build AI Homework Assignment" actions. Clicking these buttons will pass the active module text directly into our downstream edge-generation models.
+
+### 2. VINEXT EDGE ROUTE CONTENT HANDLER
+In the backend API handler file, enforce strict edge validation and optimization workflows:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Edge Session Access Guard: Extract the active user context via better-auth. Verify that the authenticated user's role is strictly registered as 'tutor' or 'admin'. Cross-reference the database to ensure this tutor is assigned to the course ID passed in the request query. Return a 403 Forbidden status if validation checks fail.
+- Payload Ingestion: Process incoming POST or PUT requests carrying `courseId` (string), `moduleId` (string), `title` (string), and `sourceContent` (string). Ensure text strings are cleanly sanitized.
+- Atomic SQL Transaction: Execute a clean Drizzle SQL operation to write or update the record inside the Cloudflare D1 `course_modules` table. If successful, automatically append an updated timestamp tracking tag and clear any stale caching references.
+
+### 3. MECHANICAL PRESENTATION & VISUAL PRIMITIVES
+- Full Responsive Adaptations: Ensure multi-pane layouts collapse cleanly into a single-pane swipe view on mobile viewports so tutors can review documents on the fly.
+- Dark Mode Tokens: Synchronize all backgrounds, input cards, nested tree grids, borders, and buttons using semantic utility marks (`bg-background`, `border-border`, `text-card-foreground`, `dark:bg-zinc-900`) that respond seamlessly to system-wide theme switches.
