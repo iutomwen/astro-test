@@ -1,0 +1,24 @@
+Act as a Senior Frontend UX Engineer specializing in micro-interactions, gamified web components, and physics-based React animations.
+
+Generate the interactive Client-Side Reward Celebration Component (`src/components/dashboard/reward-celebration.tsx`) for our Cloudflare Vinext LMS application. This component is triggered dynamically when a student completes all 4 days of their assigned British Curriculum weekly homework block. It must fire an ultra-smooth, lightweight canvas confetti effect, display their unlocked reward milestone, and integrate cleanly with our existing multi-role dashboards.
+
+Do not truncate code blocks, do not leave empty animation loops, and enforce full TypeScript strictness.
+
+### 1. INTERACTIVE PHYSICS CONFETTI ENGINE
+- Client-Side Trigger: Integrate the lightweight `canvas-confetti` browser library. The explosion must trigger instantly the millisecond the component mounts or when the parent completion state flips to true.
+- Explosion Parameters: Configure a highly satisfying, multi-vector particle burst (e.g., side cannons firing toward the center of the viewport) with high-density color palettes matching our application design tokens. It must operate efficiently on mobile web browsers without causing frame drops or lagging UI interactions.
+
+### 2. GAMIFIED REWARDS INTERFACE (SHADCN UI & RADIX)
+Create an elegant, center-aligned modal overlay using the Shadcn Dialog primitive:
+- Visual Accomplishment Banner: A majestic, glassmorphism card asset (`bg-card/50 backdrop-blur-md border-border`) housing a spinning or pulsing premium reward icon (such as a 3D-styled star or a traditional British House Cup emblem).
+- Dynamic Achievement Copy: Render clear, motivational text customized to the student's academic level:
+  * Primary School (KS1-KS2): High-energy typography reading: "Brilliant Work, Star Pupil! You completed your 4-day streak and earned 50 House Points!"
+  * Secondary School (KS3-KS4): Professional milestone layout reading: "Weekly Curriculum Target Achieved. Module Completion Badge Logged to Student Profile."
+- Action Control Bar: Provide a prominent "Claim Reward & Return" call-to-action button that triggers a local client update to safely close the modal, dismiss the particle canvas, and route them back to their primary home page dashboard.
+
+### 3. PERSISTENT ACCOUNT INTEGRATION
+- Client-to-Server Hook: When the student hits the claim button, dispatch a fast non-blocking background fetch call to our Vinext API layer (`/api/homework/claim-reward`) to write the earned award token securely to their permanent Cloudflare D1 profile record, clearing any unread client notifications.
+
+### 4. PRESENTATION METRICS & LIGHT/DARK TOGGLING
+- Full Responsive Adapters: The modal card must handle structural scaling flawlessly on compact smartphone touch screens without dropping text visibility or clipping the active CTA button.
+- Deep Dark Mode Synchronization: Ensure all text primitives, icon backdrops, modal curtains, and button shadows hook natively into standard Tailwind variables (`text-foreground`, `bg-background`, `dark:zinc-950`) to react seamlessly if the student changes their system-wide theme preference.
