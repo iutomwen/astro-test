@@ -1,0 +1,29 @@
+Act as a Principal Edge Infrastructure Engineer specializing in asynchronous background parsing, Cloudflare Workers AI pipelines, and LLM text evaluation metrics.
+
+Generate an automated AI Grading Engine Route Handler (`src/app/api/student/assignments/grade/route.ts`) built inside the Cloudflare Vinext framework structure. This endpoint is triggered immediately following a student's final homework submission. It reads the homework schema requirements from Cloudflare D1, passes short-answer and multiple-choice responses through an evaluation model via Workers AI, calculates exact grade metrics, and updates the permanent D1 row state.
+
+Do not truncate code blocks, do not leave empty loops, and enforce strict, airtight JSON data type structures.
+
+### 1. ENVIRONMENT BINDINGS & DEPENDENCIES
+- Cloudflare Module Imports: You must utilize the official native workers configuration syntax to access runtime bindings. Use exactly: `import { env } from "cloudflare:workers";`
+- Active Hardware Resources: Initialize Drizzle ORM dynamically using the context binding: `const db = drizzle(env.DB);`. Map `env.AI` to target edge inference catalogs cleanly.
+
+### 2. DATA ORCHESTRATION & ACCESS CONTROL
+- Secure Request Parsing: Capture the `submissionId` string from the incoming POST request body.
+- Role/Session Verification: Intercept the better-auth edge session context. Confirm that the calling entity is either an authorized internal system worker, an authenticated 'admin', or the specific 'student' owner dispatching their own workflow.
+- Relational Data Fetching: Execute rapid parallel database fetches to retrieve:
+  1. The student's specific entry row from the 'homework_submissions' table.
+  2. The parent assignment layout configuration from the 'homework_assignments' table (which contains the teacher's original master marking criteria and correct answer keys).
+
+### 3. CURRICULUM-AWARE AI GRADING PIPELINE
+- Model Targeting: Execute text evaluation inference using the premium high-reasoning `@cf/meta/llama-3.1-70b-instruct` model bound locally inside Workers AI.
+- Deterministic Evaluation Prompt: Construct a precise system prompt block directing the model to evaluate the student's work with extreme structural strictness. The prompt must dictate:
+  * Grade multiple-choice responses deterministically against the target integer key.
+  * Score short-answer text using the teacher's stored marking criteria rubric.
+  * Calculate an isolated score metric per question alongside a clear, encouraging markdown string explanation outlining why points were deducted or awarded.
+- Strict Formatting Rule: Enforce that the engine must return ONLY a raw, un-wrapped valid JSON object matching this schema blueprint: `{ totalScoreAwarded: number, maxPossibleScore: number, feedbackSummary: string, detailedBreakdown: Array<{ questionId: number, pointsAwarded: number, feedback: string }> }`. Forbid markdown wrapping notation or chat preambles.
+
+### 4. DATA UPDATE TRANSACTION (`env.DB`)
+- Atomic Schema Mutation: Pass the LLM response text through a safe `JSON.parse()` wrapper block. If validation succeeds, execute an update transaction to overwrite the target record in the `homework_submissions` table.
+- State Transition: Change the row's `status` column from 'submitted' directly to 'graded', populate the empty `gradePayload` json column with your newly computed object block, and record the exact completion timestamp.
+- Fail-Safe Fallback: If an exception occurs during the AI run or parsing phase, catch the error, flag the row status as 'failed_grading', and throw a clear 500 JSON exception code containing diagnostic tracking keys.
