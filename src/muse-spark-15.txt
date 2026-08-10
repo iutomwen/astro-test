@@ -1,0 +1,29 @@
+Act as a Principal Full-Stack Engineer and British Curriculum Director specializing in adaptive ed-tech systems and real-time micro-services on Cloudflare.
+
+Generate the frontend component layout (`src/app/dashboard/shared/adaptive-homework/page.tsx`) and the corresponding backend Vinext edge endpoint handler (`src/app/api/homework/adaptive-engine/route.ts`). This module drives a 4-days-a-week British Curriculum homework track spanning Primary (Key Stage 1-2) and Secondary (Key Stage 3-4) standards, tracks automated badge rewards, and implements an "Error-Targeting Loop" that intercepts wrong answers to reshape student learning milestones.
+
+Do not truncate code blocks, do not leave empty loops, and implement full structural alignment with Shadcn UI and Tailwind CSS tokens.
+
+### 1. FRONTEND WORKSPACE & INTERACTIVE PROGRESSION
+Design a student-centric learning panel optimized for primary/secondary visibility:
+- 4-Day Progress Matrix: A high-density dashboard row showing 4 explicit, chronological weekly lesson columns (Day 1 to Day 4). Day blocks must render adaptive status indicators: Locked, Available, Active, or Completed.
+- Adaptive Reward Panel: A visual component linked directly to completion states. Once Day 4 is checked off, flash a responsive celebration overlay showcasing their unlocked British-system reward (e.g., "Star Pupil Badge", "House Points Token", or custom Parent Reward Milestones).
+- Live Wrong-Answer Review Console: A dedicated interface segment that reveals itself only when an assignment generates error logs. It lists incorrect question entries alongside a clean, interactive "Target Set: Retry Module" action button.
+
+### 2. CORE DATABASE SCHEMA (`src/db/schema.ts`)
+Write a complete Drizzle ORM schema script for Cloudflare D1 containing:
+- 'homework_schedules': Tracks the unique identifier, user ID, school stage enum ('primary_ks1', 'primary_ks2', 'secondary_ks3', 'secondary_ks4'), current week index, and a JSON object array managing the 4 discrete days of tasks.
+- 'wrong_answers_tracker': Captures structural metadata whenever a student fails an item: submission ID, question ID, subject domain code (e.g., "Maths_KS2_Fractions"), wrong input data string, target remediation status ('pending' | 'retried' | 'mastered'), and the dynamically generated target criteria.
+
+### 3. CURRICULUM-AWARE TARGET HANDLING & WORKERS AI
+In your Vinext API route, hook into Cloudflare network resources to handle adaptive routing:
+- Environment Ingestion: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Authorization Guard Check: Intercept the better-auth edge session token to verify the active role ('student', 'tutor', or 'parent'). Protect cross-user requests cleanly.
+- The Adaptive Failure Loop: Write a POST sub-routine that evaluates submitted assignment answers. If a student's answer is marked incorrect:
+  1. Instantly log the row item to the 'wrong_answers_tracker' table.
+  2. Dispatch an execution thread to `env.AI` using `@cf/meta/llama-3.1-70b-instruct` to extract the failed concept core, parse current British National Curriculum benchmarks, and return a brand-new customized target challenge block.
+  3. Append this remediation target directly into the student's upcoming homework queue matrix.
+
+### 4. PRESENTATION METRICS & THEMING
+- Responsive Educational Adapters: Apply clean visual scaling. Primary interfaces must render large, high-contrast, gamified typography buttons, while Secondary views transition into structured, data-dense diagnostic timelines.
+- Dark Mode Tokens: Synchronize all backdrops, borders, progress arcs, and selection tabs cleanly with rich utility markers (`bg-background`, `border-border`, `text-foreground`, `dark:bg-zinc-950`) that adapt instantly to system-wide theme switches.
