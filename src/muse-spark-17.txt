@@ -1,0 +1,117 @@
+Act as a Principal Backend Engineer specializing in atomic database mutations, multi-tenant reward structures, and Cloudflare D1 integration.
+
+Generate the secure Reward Claim API Route Handler (`src/app/api/homework/claim-reward/route.ts`) inside our Cloudflare Vinext framework application. This endpoint intercepts requests from the Client-Side Reward Celebration Component when a student claims their 4-day streak completion, calculates point values, updates their persistent total in Cloudflare D1 via Drizzle ORM, and records an transaction ledger event.
+
+Do not truncate code blocks, do not leave empty transaction blocks, and enforce full edge runtime type strictness.
+
+### 1. RUNTIME CONFIGURATION & BINDINGS
+- Cloudflare Module Imports: You must utilize the official native workers configuration syntax to look up database definitions. Use exactly: `import { env } from "cloudflare:workers";`
+- DB Engine Mapping: Inside the route function block, instantiate Drizzle dynamically: `const db = drizzle(env.DB);`.
+
+### 2. SECURITY, CONCURRENCY & ACCESS SEGREGATION
+- Edge Session Interception: Parse incoming headers to extract the better-auth edge session context. 
+- Strict Role Verification: Ensure that the authenticated user's role is strictly registered as 'student'. Return an absolute 403 Forbidden JSON status instantly if validation fails.
+- Double-Claim Defenses: Check the database to confirm that the student has not already claimed a reward for the requested 'weekIndex'. If a claim history record already exists, block execution and return a 400 Bad Request error to mitigate duplications.
+
+### 3. ATOMIC TRANSACTIONS & DATA SCHEMA LIFECYCLE
+Implement a database transaction pipeline to secure data entries:
+- Target Point Math: Read the student's 'schoolStage' enum ('primary_ks1', 'primary_ks2', etc.). Assign 50 House Points for primary stages and 100 Achievement Points for secondary stages.
+- Ledger Commit: Execute an update mutation to increment the user's total points column inside the 'users' table.
+- History Audit Creation: Simultaneously insert a row record into our 'reward_claims_ledger' table capturing: unique claim ID, studentId, weekIndex, pointsAwarded, stageIndex, and an atomic creation timestamp tracking flag.
+
+### 4. DIAGNOSTICS & SYSTEM SAFETY
+- Error Catching: Wrap the transaction suite inside a secure try-catch loop. If database locks or schema errors occur on the Cloudflare edge workers layer, abort mutations and return a clean 500 status containing an uninformative status log marker.
+
+
+
+export interface CurriculumDomain {
+  code: string;
+  name: string;
+  targets: string[];
+}
+
+export interface KeyStageStandard {
+  coreSubjects: {
+    [subject: string]: {
+      attainmentTargets: CurriculumDomain[];
+    };
+  };
+}
+
+export interface BritishCurriculumFramework {
+  academicYear: 2026;
+  stages: {
+    primary_ks1: KeyStageStandard;
+    primary_ks2: KeyStageStandard;
+    secondary_ks3: KeyStageStandard;
+    secondary_ks4: KeyStageStandard;
+  };
+}
+
+export const curriculum2026Config: BritishCurriculumFramework = {
+  academicYear: 2026,
+  stages: {
+    primary_ks1: {
+      coreSubjects: {
+        maths: {
+          attainmentTargets: [
+            {
+              code: "MATHS_KS1_NUM",
+              name: "Number & Place Value",
+              targets: ["Count to/across 100", "Identify 1 more/less", "Read/write numbers to 100"]
+            },
+            {
+              code: "MATHS_KS1_CALC",
+              name: "Addition & Subtraction",
+              targets: ["Represent/use number bonds to 20", "Add/subtract 1-digit and 2-digit numbers"]
+            }
+          ]
+        }
+      }
+    },
+    primary_ks2: {
+      coreSubjects: {
+        maths: {
+          attainmentTargets: [
+            {
+              code: "MATHS_KS2_FRAC",
+              name: "Fractions & Decimals",
+              targets: ["Recognise equivalent fractions", "Add/subtract fractions with same denominator"]
+            },
+            {
+              code: "MATHS_KS2_ALG",
+              name: "Algebra Foundations",
+              targets: ["Express missing number problems algebraically", "Find pairs of numbers satisfying equations"]
+            }
+          ]
+        }
+      }
+    },
+    secondary_ks3: {
+      coreSubjects: {
+        maths: {
+          attainmentTargets: [
+            {
+              code: "MATHS_KS3_ALG",
+              name: "Advanced Algebra",
+              targets: ["Simplify/manipulate algebraic expressions", "Model linear relationship graphs"]
+            }
+          ]
+        }
+      }
+    },
+    secondary_ks4: {
+      coreSubjects: {
+        maths: {
+          attainmentTargets: [
+            {
+              code: "MATHS_KS4_GCSE",
+              name: "GCSE Core Targets",
+              targets: ["Solve simultaneous equations", "Apply trigonometric ratios to right-angled triangles"]
+            }
+          ]
+        }
+      }
+    }
+  }
+};
