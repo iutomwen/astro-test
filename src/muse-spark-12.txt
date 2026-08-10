@@ -1,0 +1,27 @@
+Act as a Principal Real-Time Systems Engineer specializing in Cloudflare WebSockets, Durable Objects, and message stream state handling.
+
+Generate a highly responsive Student/Tutor Chat Component Layout (`src/app/dashboard/chat/page.tsx`) and its accompanying Vinext edge API WebSocket route handler (`src/app/api/chat/connect/route.ts`). This system enables real-time messaging, presence tracking, and historical log synchronization between users explicitly holding the 'student' or 'tutor' roles.
+
+Do not truncate code blocks, do not write dummy loops, and enforce strict edge runtime types.
+
+### 1. FRONTEND CHAT WORKSPACE (SHADCN UI)
+Design an ultra-smooth, instant messaging layout containing:
+- Left Pane (Active Channels Ledger): A scrollable roster list using Shadcn ScrollArea displaying active conversation targets. Each channel card must display user avatar fallback icons, names, a distinct role indicator badge ('student' or 'tutor'), the truncated string snippet of the latest message, and a relative time tracker ticker.
+- Right Pane (Live Message Stream Thread): 
+  * Header Widget: Name, active role, and a real-time visual green/gray presence status indicator dot ('online' | 'offline').
+  * Scroll Window Container: Automatically docks to the absolute bottom on initialization or incoming messages. Group messages cleanly: student responses aligned to the right using the application primary color token theme, and tutor responses left-aligned with subtle background contrast fills.
+  * Message Input Footer: A clean, multi-line auto-growing Textarea coupled with an instant "Send" icon button. Enforce loading states to handle message network handshakes safely.
+
+### 2. CLOUDFLARE WEBSOCKETS / DURABLE OBJECTS ROUTE ENGINE
+In the backend Vinext route file, implement native Cloudflare network bindings:
+- Runtime Environment Setup: Use exactly: `import { env } from "cloudflare:workers";` and instantiate Drizzle via `const db = drizzle(env.DB);`.
+- Upgrade Handshake Hook: Intercept the incoming client fetch call. If the request headers match a valid WebSocket upgrade transaction (`Upgrade: websocket`), establish the handshake using `new Response(null, { status: 101, webSocket: clientSocket })`.
+- Relational Channel Guard Check: Intercept the active user's better-auth edge session. Validate that the sender's role is strictly 'student' or 'tutor'. Ensure that the student user is explicitly enrolled in a classroom course led by the target tutor user before linking the connection. Instantly drop the stream handshake with a 403 status if verification fails.
+
+### 3. MESSAGE PAYLOAD PROCESSING & LOG HISTORY
+- Protocol Event Handler: Implement asynchronous state listeners (`onmessage`, `onclose`, `onerror`) on the server WebSocket instance. All incoming string payloads must match this strict structural JSON interface schema: `{ type: 'text' | 'typing', channelId: string, content: string }`.
+- DB Sync Pipeline: When an authorized text message object crosses the edge worker layer, broadcast the token instantly to the opposing channel socket. Simultaneously dispatch a background execution routine (`ctx.waitUntil`) to permanently commit the record to the Cloudflare D1 database instance, updating timestamp indicators instantly.
+
+### 4. PRESENTATION METRICS & THEMING
+- Fluid Responsive Transitions: On small mobile screens, the channel list must slide off-canvas when a thread is selected, transforming the window into a full-bleed mobile touch interface.
+- Dark Mode Tokens: Synchronize all message bubbles, scroll backgrounds, borders, inputs, and presence highlights with rich semantic markers (`bg-muted`, `border-input`, `text-primary-foreground`, `dark:bg-zinc-950`) responding seamlessly to system theme switches.
