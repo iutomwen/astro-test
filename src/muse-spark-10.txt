@@ -1,6 +1,6 @@
 Act as a Principal Frontend Engineer specializing in nested layout architectures, complex drag-and-drop or accordion states, and content management workflows.
 
-Generate the Tutor Course Builder Workspace View (`src/app/dashboard/tutor/courses/[id]/builder/page.tsx`) and its accompanying Vinext edge API route handler (`src/app/api/tutor/courses/materials/route.ts`). This workspace allows authenticated users with the 'tutor' role to manage an individual course structure, split content into modular chapters, paste or upload rich text source materials, and flag topics for AI automated generation.
+Generate the Tutor Course Builder Workspace View (`app/dashboard/tutor/courses/[id]/builder/page.tsx`) and its accompanying Vinext edge API route handler (`app/api/tutor/courses/materials/route.ts`). This workspace allows authenticated users with the 'tutor' role to manage an individual course structure, split content into modular chapters, paste or upload rich text source materials, and flag topics for AI automated generation.
 
 Do not truncate code blocks, do not leave empty placeholder loops, and implement full structural alignment with Shadcn UI and Tailwind CSS.
 
