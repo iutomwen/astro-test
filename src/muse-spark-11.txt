@@ -1,12 +1,12 @@
 Act as a Principal Frontend Engineer specializing in queue management architectures, rapid triage control layouts, and real-time support data feeds.
 
-Generate the Customer Service Help Desk View (`src/app/dashboard/support/tickets/page.tsx`), the individual ticket detail and resolution console (`src/app/dashboard/support/tickets/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`src/app/api/support/tickets/manage/route.ts`). This module allows authenticated users with the 'customerService' role to browse, assign, filter, and close system tickets across multiple educational tenants.
+Generate the Customer Service Help Desk View (`app/dashboard/support/tickets/page.tsx`), the individual ticket detail and resolution console (`app/dashboard/support/tickets/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`app/api/support/tickets/manage/route.ts`). This module allows authenticated users with the 'customerService' role to browse, assign, filter, and close system tickets.
 
 Do not truncate code blocks, do not leave empty placeholder loops, and implement full structural support for light and dark modes.
 
 ### 1. SUPPORT QUEUE DASHBOARD (`/tickets/page.tsx`)
 Create a high-velocity triage grid containing:
-- Multi-Tenant Queue Filters: Faceted filtering menus using Shadcn UI dropdowns to narrow the queue by: Ticket Status ('Open' | 'Pending' | 'Resolved'), Urgency ('Low' | 'Medium' | 'High' | 'Critical'), and Tenant/School assignment.
+- Account Queue Filters: Faceted filtering menus using Shadcn UI dropdowns to narrow the queue by: Ticket Status ('Open' | 'Pending' | 'Resolved'), Urgency ('Low' | 'Medium' | 'High' | 'Critical').
 - Ticket Entry Row Display: Map rows of incoming tickets featuring:
   * Unified Submitter Info: Displays user avatar fallback icon, display name, and clear role badge ('student', 'parent', or 'tutor').
   * Subject & Reference: Highlighting the issue category (e.g., "AI Grading Dispute", "Login Failure", "Billing Discrepancy") with a clean, unique alphanumeric tracking token.
@@ -14,7 +14,7 @@ Create a high-velocity triage grid containing:
 
 ### 2. RESOLUTION CONSOLE (`/tickets/[id]/page.tsx`)
 Create a dual-pane workspace optimized for fast ticket closure:
-- Left Pane (Context & Audit Trail): Displays the comprehensive issue description, parent tenant details, and a dynamic Audit Widget. If the ticket category matches an "AI Grading Dispute", automatically embed a diagnostic view showing the raw underlying scores and feedback summary string outputted by the Automated AI Grading Engine directly from the database.
+- Left Pane (Context & Audit Trail): Displays the comprehensive issue description, parent details, and a dynamic Audit Widget. If the ticket category matches an "AI Grading Dispute", automatically embed a diagnostic view showing the raw underlying scores and feedback summary string outputted by the Automated AI Grading Engine directly from the database.
 - Right Pane (Communication Log & Actions): A vertical timeline showing chronological thread messages. Include a rich response form containing a Shadcn Textarea for typing replies, a quick dropdown to insert macro-responses, and a primary footer housing a "Send & Resolve Ticket" action button.
 
 ### 3. VINEXT EDGE ROUTE QUEUE HANDLER
