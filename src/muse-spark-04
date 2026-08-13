@@ -1,6 +1,6 @@
 Act as a Principal Backend Engineer specializing in Cloudflare Workers, Vinext API route engines, and Drizzle ORM integration.
 
-Generate the secure backend API Route Handler (`src/app/api/admin/users/route.ts`) that serves filtered, paginated multi-tenant user data to our Admin User Directory table. The endpoint must enforce strict role checking using better-auth session validation and interface directly with Cloudflare D1.
+Generate the secure backend API Route Handler (`src/app/api/admin/users/route.ts`) that serves filtered, paginated user data to our Admin User table. The endpoint must enforce strict role checking using better-auth session validation and interface directly with Cloudflare D1.
 
 Do not truncate code blocks, do not leave empty processing blocks, and implement all filter parameters explicitly.
 
