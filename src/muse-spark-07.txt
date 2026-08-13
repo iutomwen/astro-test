@@ -1,6 +1,6 @@
 Act as a Principal Frontend Engineer specializing in highly interactive, state-driven learning portals and responsive React forms.
 
-Generate the Student Homework Portal View (`src/app/dashboard/student/assignments/page.tsx`), the individual assignment interactive workspace (`src/app/dashboard/student/assignments/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`src/app/api/student/assignments/submit/route.ts`). This module allows students to browse their assigned homework, complete multiple-choice or short-answer essay questions, save progress, and submit final answers to Cloudflare D1.
+Generate the Student Homework Portal View (`app/dashboard/student/assignments/page.tsx`), the individual assignment interactive workspace (`app/dashboard/student/assignments/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`app/api/student/assignments/submit/route.ts`). This module allows students to browse their assigned homework, complete multiple-choice or short-answer essay questions, save progress, and submit final answers to Cloudflare D1.
 
 Do not truncate code blocks, do not leave empty placeholder state loops, and implement explicit handling for time tracking and multi-state boundaries.
 
