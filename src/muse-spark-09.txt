@@ -1,6 +1,6 @@
 Act as a Principal Frontend Engineer specializing in multi-tenant family relationship dashboards, secure role-based queries, and accessible data visualizations.
 
-Generate the Parent Dashboard Portal View (`src/app/dashboard/parent/page.tsx`), the student detail view (`src/app/dashboard/parent/student/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`src/app/api/parent/student/data/route.ts`). This module allows authenticated users with the 'parent' role to view an aggregate summary of their linked students, inspect specific assignment grades calculated by the AI engine, check overdue deadlines, and review school billings.
+Generate the Parent Dashboard Portal View (`app/dashboard/parent/page.tsx`), the student detail view (`app/dashboard/parent/student/[id]/page.tsx`), and its accompanying Vinext edge API route handler (`app/api/parent/student/data/route.ts`). This module allows authenticated users with the 'parent' role to view an aggregate summary of their linked students, inspect specific assignment grades calculated by the AI engine, check overdue deadlines, and review school billings.
 
 Do not truncate code blocks, do not leave empty placeholder state loops, and implement full structural support for light and dark modes.
 
