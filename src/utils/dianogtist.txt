@@ -58,3 +58,106 @@ async function processLargeData(data) {
 `````
 
 *Note: The code fixes and findings above were identified on a live page in DevTools. When applying them to your codebase, please adapt them to your project's specific technical stack (e.g., Tailwind CSS classes, CSS modules, framework components) rather than applying them as literal CSS overrides.*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Performance Optimization Summary: peninsulagrouplimited.com
+
+**Context**
+Analysis of page responsiveness and third-party script impact, focusing on a high Interaction to Next Paint (INP) score and significant main thread contention during load.
+
+**Diagnostics**
+The following metrics and resource impacts were identified:
+
+| Metric / Resource | Value / Impact | Technical Context |
+| :--- | :--- | :--- |
+| **INP** | 289 ms | Categorized as "Needs Improvement." |
+| **Input Delay** | 251 ms | 87% of total interaction time; caused by main thread blocking. |
+| **Script Compilation** | 559 ms | Significant V8 overhead from loading large bundles at once. |
+| **Critical Path Latency** | 843 ms | Influenced by deep request chains and discovery delays. |
+| **Google Tag Manager** | 567 ms | Largest main thread contributor; triggers tasks up to 305 ms. |
+| **Facebook Pixel** | 287 ms | High compilation cost early in the page lifecycle. |
+| **Clarity** | 129 ms | Adds to thread congestion during the critical load phase. |
+
+**Actionable Findings**
+*   **Main Thread Yielding:** Long tasks (up to 329 ms) block user input. Breaking long-running scripts into smaller chunks using `scheduler.yield()` or `requestIdleCallback()` can reduce input delay.
+*   **GTM Trigger Optimization:** Most tags fire on "Page View," creating a "thundering herd" effect. Moving non-essential tags (Clarity, LinkedIn, Facebook) to the "Window Loaded" trigger prevents them from blocking the initial render.
+*   **Network Flattening:** The site contains nested request chains (e.g., `Layout.astro` triggering `pageTracker.js`). Preloading critical assets can shorten the path to rendering.
+*   **Font Discovery:** `Owners-Wide-Black.otf` is discovered late. Preloading this font in the HTML `<head>` allows the browser to initiate the download before CSS parsing completes.
+
+**Optimization Strategies**
+The following strategies were identified as potential fixes for the main thread and network bottlenecks:
+
+**1. Resource Preloading**
+To optimize the critical path, essential fonts and chained scripts can be preloaded:
+
+`````html
+<!-- Example of preloading the critical brand font -->
+<link rel="preload" href="/assets/fonts/Owners-Wide-Black.otf" as="font" type="font/otf" crossorigin>
+
+<!-- Example of flattening script chains -->
+<link rel="modulepreload" href="/assets/pageTracker.Bfle8jVP.js">
+`````
+
+
+**2. Offloading to Web Workers**
+Third-party tracking scripts can be offloaded to background threads using Partytown via a GTM Custom HTML tag:
+
+`````js
+// Example Partytown configuration for GTM integration
+partytown = {
+  forward: ['fbq', 'clarity'],
+  lib: '/relative-path-to-partytown-files/'
+};
+
+// Wrap third-party scripts in the GTM Custom HTML tag
+// <script type="text/partytown"> ... tracking code ... </script>
+`````
+
+
+**3. Yielding Execution**
+For long-running application logic, yielding execution allows the browser to interleave user interactions:
+
+`````js
+async function performHeavytask() {
+  // Execute initial chunk
+  if (globalThis.scheduler?.yield) {
+    await scheduler.yield();
+  } else {
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+  // Execute remaining chunk
+}
+`````
+
+*Note: The code fixes and findings above were identified on a live page in DevTools. When applying them to your codebase, please adapt them to your project's specific technical stack (e.g., Tailwind CSS classes, CSS modules, framework components) rather than applying them as literal CSS overrides.*
