@@ -1,0 +1,60 @@
+## Performance Optimization: Peninsula Group Limited
+
+**Context**
+Analysis of the site's responsiveness and loading performance, specifically focusing on a slow `pointerdown` interaction (INP of 289 ms), high main thread contention, and critical path inefficiencies.
+
+**Diagnostics**
+The longest interaction was delayed primarily by main thread activity, with 87% of the duration attributed to input delay.
+
+| Metric | Value | Primary Contributor |
+| :--- | :--- | :--- |
+| **INP (pointerdown)** | 289 ms | Input Delay (251 ms) |
+| **Main Thread Tasks** | ~5,000 ms (total) | Third-party script execution |
+| **Script Compilation** | 559 ms | Large JavaScript bundles |
+| **Critical Path Latency** | 843 ms | Chained requests and late font discovery |
+
+**Third-Party Impact**
+Third-party scripts account for over 1 second of main thread work, blocking the browser from responding to user input.
+
+| Provider | Main Thread Time | Transfer Size |
+| :--- | :--- | :--- |
+| Google Tag Manager | 567 ms | 329.7 kB |
+| Facebook | 287 ms | 178.2 kB |
+| Clarity | 129 ms | 2.5 kB |
+
+**Actionable Findings**
+*   **Main Thread Yielding:** Long-running tasks (some exceeding 300 ms) block the main thread. Breaking these tasks into smaller chunks allows the browser to interleave user interactions.
+*   **Network Request Chains:** Dependencies are deeply nested (e.g., `Layout.astro` triggering `pageTracker.js`), increasing the time to reach a ready state.
+*   **Font Discovery:** The critical brand font `Owners-Wide-Black.otf` is discovered late, delaying text rendering.
+*   **GTM Over-firing:** Multiple Google tags (`AW-992214959`, `AW-987747254`, `G-7E7CSYJD7V`) load during initialization, causing redundant execution.
+
+**Recommended Strategies**
+The following architectural changes are suggested to improve responsiveness and load speed:
+
+*   **Preload Critical Assets:** Add preload hints for essential fonts to ensure they are downloaded in parallel with high-priority CSS.
+
+`````html
+<!-- Example of preloading the critical brand font -->
+<link rel="preload" href="/assets/fonts/Owners-Wide-Black.otf" as="font" type="font/otf" crossorigin>
+`````
+
+
+*   **Defer Non-Critical Scripts:** Move triggers for non-essential third-party scripts (like heatmaps or tracking pixels) from "Page View" to "Window Loaded" within Google Tag Manager.
+*   **Flatten Dependency Tree:** Consolidate multiple small component scripts (e.g., `NavItem.js`, `SuccessForm.js`, `NewsletterForm.js`) into a single shared bundle or inline critical logic to reduce network round trips.
+*   **Offload Heavy Scripts:** Utilize libraries like `Partytown` to run intensive third-party scripts (Facebook Pixel, Clarity) in a Web Worker, freeing the main thread for UI tasks.
+*   **Task Yielding:** If executing heavy application logic, use yielding patterns to prevent blocking the thread.
+
+`````js
+// Example of yielding to the browser to improve interaction responsiveness
+async function processLargeData(data) {
+  for (const item of data) {
+    performWork(item);
+    // Yield execution if the browser needs to handle user input
+    if (typeof scheduler !== 'undefined' && scheduler.yield) {
+      await scheduler.yield();
+    }
+  }
+}
+`````
+
+*Note: The code fixes and findings above were identified on a live page in DevTools. When applying them to your codebase, please adapt them to your project's specific technical stack (e.g., Tailwind CSS classes, CSS modules, framework components) rather than applying them as literal CSS overrides.*
